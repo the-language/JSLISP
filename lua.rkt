@@ -27,16 +27,22 @@
     [`(define ,i) (++ "local " (id i) "\n")]
     [`(define ,i ,v) (++ "local " (id i) "=" (EVAL v) "\n")]
     [`(set! ,x ,v) (++ (EVAL x) "=" (EVAL v) "\n")]
-    [`(lambda (,a ...) ,s ...)
-     (++ "(function(" (add-between a ",") ")"
-                                (map EVAL s)
-                                "end)")]
+    [(cons 'λ x) (EVAL (cons 'lambda x))]
+    [`(lambda (,a ...) ,@s)
+     (++ "(function(" (add-between (map id a) ",") ")\n"
+         (map EVAL s)
+         "end)")]
+    [`(lambda ,(list-rest a ... r) ,@s)
+     (++ "(function(" (add-between (append (map id a) (list "...")) ",") ")\n"
+         "local " (id r) "={...}\n"
+         (map EVAL s)
+         "end)")]
     [`(return ,x) (++ "return " (EVAL x) "\n")]
     [`(! ,@v)
      (++ "{" (add-between
-      (map (match-lambda [`[,i ,v] (++ (id i) "=" (EVAL v))])
-          v)
-      ",")
+              (map (match-lambda [`[,i ,v] (++ (id i) "=" (EVAL v))])
+                   v)
+              ",")
          "}")]
     [`(ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "]")]
     [`(@ ,x ,i) (++ (EVAL x) "." (id i))]
@@ -48,8 +54,8 @@
          "end\n")]
     [`(block ,@c) (EVAL `((lambda () ,@c)))]
     [`(if ,b ,x ,y) (EVAL `(block (if/begin b
-                                      [(return ,x)]
-                                      [(return ,y)])))]
+                                            [(return ,x)]
+                                            [(return ,y)])))]
     [`(vector ,@x) (++ "{" (add-between (map EVAL x) ",") "}")]
     [`(vector-length ,v) (++ "(#" (EVAL v) ")")]
     [`(apply ,f ,xs) (++ (EVAL f) "(unpack(" (EVAL xs) "))")]

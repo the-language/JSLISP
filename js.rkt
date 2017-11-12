@@ -27,16 +27,26 @@
     [`(define ,i) (++ "var " (id i) "\n")]
     [`(define ,i ,v) (++ "var " (id i) "=" (EVAL v) "\n")]
     [`(set! ,x ,v) (++ (EVAL x) "=" (EVAL v) "\n")]
-    [`(lambda (,a ...) ,s ...)
-     (++ "(function(" (add-between a ",") "){"
+    [(cons 'λ x) (EVAL (cons 'lambda x))]
+    [`(lambda (,a ...) ,@s)
+     (++ "(function(" (add-between (map id a) ",") "){"
          (map EVAL s)
          "})")]
+    [`(lambda ,(list-rest a ... r) ,@s)
+     (let ([r (id r)])
+     (++ "(function(" (add-between (map id a) ",") "){\n"
+         "var " r "=[null]\n"
+         "for(var i_=" (number->string (length a)) ";i_<arguments.length;i++){\n"
+         r "[" r ".length]=arguments[i_]\n"
+         "}\n"
+         (map EVAL s)
+         "})"))]
     [`(return ,x) (++ "return " (EVAL x) "\n")]
     [`(! ,@v)
      (++ "({" (add-between
-              (map (match-lambda [`[,i ,v] (++ (id i) ":" (EVAL v))])
-                   v)
-              ",")
+               (map (match-lambda [`[,i ,v] (++ (id i) ":" (EVAL v))])
+                    v)
+               ",")
          "})")]
     [`(ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "]")]
     [`(@ ,x ,i) (++ (EVAL x) "." (id i))]
