@@ -36,7 +36,7 @@
      (++ "(function(" (add-between a ",") ")"
                                 (map EVAL s)
                                 "end)")]
-    [`(return ,x) (++ "return" (EVAL x))]
+    [`(return ,x) (++ "return " (EVAL x) "\n")]
     [`(! ,@v)
      (++ "{" (add-between
       (map (match-lambda [`[,i ,v] (++ (id i) "=" (EVAL v))])
@@ -51,7 +51,10 @@
          "else\n"
          (map EVAL f)
          "end\n")]
-    [`(begin ,@c) (EVAL `((lambda () ,@c)))]
+    [`(block ,@c) (EVAL `((lambda () ,@c)))]
+    [`(if ,b ,x ,y) (EVAL `(block (if/begin b
+                                      [(return ,x)]
+                                      [(return ,y)])))]
     [`(vector ,@x) (++ "{" (add-between (map EVAL x) ",") "}")]
     [`(apply ,f ,xs) (++ (EVAL f) "(unpack(" (EVAL xs) "))")]
     [`(+ ,@x) (++ "(" (add-between (map EVAL x) "+") ")")]
