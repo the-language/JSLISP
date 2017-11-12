@@ -39,7 +39,7 @@
       ",")
          "}")]
     [`(ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "]")]
-    [`(vector-ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "+1]")]
+    [`(vector-ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "]")]
     [`(@ ,x ,i) (++ (EVAL x) "." (id i))]
     [`(if/begin ,b [,@t] [,@f])
      (++ "if " (EVAL b) " then\n"
@@ -68,13 +68,14 @@
     [`(eq? ,x ,y) (++ "(" (EVAL x) "==" (EVAL y) ")")]
     [`(noteq? ,x ,y) (++ "(" (EVAL x) "~=" (EVAL y) ")")]
     [`(vector-for ,i ,x ,xs ,@c)
-     (++ "for i_," (id x) " in ipairs(" (EVAL xs) ")\n"
-         "local " (id i) "=i_-1\n"
+     (++ "for " (id i) "," (id x) " in ipairs(" (EVAL xs) ")\n"
          (map EVAL c)
          "end\n")]
     [`(for ,i ,x ,t ,@c)
      (++ "for " (id i) "," (id x) " in pairs(" (EVAL t) ")\n"
+         "if " (id x) "~=nil then\n"
          (map EVAL c)
+         "end \n"
          "end \n")]
     [`(number? ,x) (EVAL `(eq? (type ,x) "number"))]
     [`(boolean? ,x) (EVAL `(eq? (type ,x) "boolean"))]

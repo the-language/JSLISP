@@ -10,7 +10,7 @@ Map                          | Lua                         |               Javas
 `(ref t "x")`                |`t["x"]`                     |`t["x"]`
 `(@ t x)`                    |`t.x`                        |`t.x`
 `(if/begin b [...] [...])`   |`if b then ... else ... end` |`if(b){ ... }else{ ... }`
-`(vector x y z)`             |`{x,y,z}`                    |`[x,y,z]`
-`(vector-ref v 0)`           |`v[0+1]`                     |`v[0]`
-`(set! (vector-ref v 1) 1)`  |`v[1+1]=1`                   |`v[1]=1`
+`(vector x y z)`             |`{x,y,z}`                    |`[null,x,y,z]`
+`(vector-ref v 1)`           |`v[1]`                       |`v[1]`
+`(set! (vector-ref v 1) 1)`  |`v[1]=1`                     |`v[1]=1`
 `(apply f t)`                |                             |
