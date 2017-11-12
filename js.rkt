@@ -29,14 +29,14 @@
     [`(set! ,x ,v) (++ (EVAL x) "=" (EVAL v) "\n")]
     [`(lambda (,a ...) ,s ...)
      (++ "(function(" (add-between a ",") "){"
-                                (map EVAL s)
-                                "})")]
+         (map EVAL s)
+         "})")]
     [`(return ,x) (++ "return " (EVAL x) "\n")]
     [`(! ,@v)
      (++ "{" (add-between
-      (map (match-lambda [`[,i ,v] (++ (id i) ":" (EVAL v))])
-          v)
-      ",")
+              (map (match-lambda [`[,i ,v] (++ (id i) ":" (EVAL v))])
+                   v)
+              ",")
          "}")]
     [`(ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "]")]
     [`(vector-ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "]")]
@@ -65,4 +65,19 @@
     [`(not ,x) (++ "(!" (EVAL x) ")")]
     [`(eq? ,x ,y) (++ "(" (EVAL x) "==" (EVAL y) ")")]
     [`(noteq? ,x ,y) (++ "(" (EVAL x) "!=" (EVAL y) ")")]
+    [`(vector-for ,i ,x ,xs ,@c)
+     (let ([i (id i)] [x (id x)])
+       (++ "var e_=" (EVAL xs) "\n" ; BUG 可能对GC支持不好
+           "for(var i_=0;i_<e_.length;i_++){\n"
+           "var " i "=i_\n"
+           "var " x "=e_[i_]\n"
+           (map EVAL c)
+           "}\n"))]
+    [`(for ,i ,x ,t ,@c)
+     (let ([i (id i)] [x (id x)])
+       (++ "var e_=" (EVAL t) "\n" ; BUG 可能对GC支持不好
+           "for(var " i " in e_){\n"
+           "var " x "=e_[" i "]\n"
+           (map EVAL c)
+           "}\n"))]
     [`(,f ,@x) (++ (EVAL f) "(" (add-between (map EVAL x) ",") ")")]))

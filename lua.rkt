@@ -67,4 +67,13 @@
     [`(not ,x) (++ "(not " (EVAL x) ")")]
     [`(eq? ,x ,y) (++ "(" (EVAL x) "==" (EVAL y) ")")]
     [`(noteq? ,x ,y) (++ "(" (EVAL x) "~=" (EVAL y) ")")]
+    [`(vector-for ,i ,x ,xs ,@c)
+     (++ "for i_," (id x) " in ipairs(" (EVAL xs) ")\n"
+         "local " (id i) "=i_-1\n"
+         (map EVAL c)
+         "end\n")]
+    [`(for ,i ,x ,t ,@c)
+     (++ "for " (id i) "," (id x) " in pairs(" (EVAL t) ")\n"
+         (map EVAL c)
+         "end \n")]
     [`(,f ,@x) (++ (EVAL f) "(" (add-between (map EVAL x) ",") ")")]))
