@@ -79,5 +79,5 @@
     [`(number? ,x) (EVAL `(eq? (type ,x) "number"))]
     [`(boolean? ,x) (EVAL `(eq? (type ,x) "boolean"))]
     [`(procedure? ,x) (EVAL `(eq? (type ,x) "function"))]
-    ;[`(!/vectror? ,x) (EVAL `(eq? (type ,x) "table"))]
+    [`(!/vectror? ,x) (EVAL `(eq? (type ,x) "table"))]
     [`(,f ,@x) (++ (EVAL f) "(" (add-between (map EVAL x) ",") ")")]))

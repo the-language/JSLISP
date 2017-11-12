@@ -84,4 +84,5 @@
     [`(number? ,x) (++ "(typeof " (EVAL x) "=='number')")]
     [`(boolean? ,x) (++ "(typeof " (EVAL x) "=='boolean')")]
     [`(procedure? ,x) (++ "(typeof " (EVAL x) "=='function')")]
+    [`(!/vectror? ,x) (++ "(typeof " (EVAL x) "=='object')")]
     [`(,f ,@x) (++ (EVAL f) "(" (add-between (map EVAL x) ",") ")")]))
