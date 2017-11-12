@@ -81,4 +81,5 @@
     [`(boolean? ,x) (EVAL `(eq? (type ,x) "boolean"))]
     [`(procedure? ,x) (EVAL `(eq? (type ,x) "function"))]
     [`(!/vectror? ,x) (EVAL `(eq? (type ,x) "table"))]
+    [`(ig ,x) (EVAL `(type ,x))]
     [`(,f ,@x) (++ (EVAL f) "(" (add-between (map EVAL x) ",") ")")]))
