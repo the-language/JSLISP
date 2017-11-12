@@ -33,11 +33,11 @@
          "})")]
     [`(return ,x) (++ "return " (EVAL x) "\n")]
     [`(! ,@v)
-     (++ "{" (add-between
+     (++ "({" (add-between
               (map (match-lambda [`[,i ,v] (++ (id i) ":" (EVAL v))])
                    v)
               ",")
-         "}")]
+         "})")]
     [`(ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "]")]
     [`(vector-ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "]")]
     [`(@ ,x ,i) (++ (EVAL x) "." (id i))]
@@ -80,4 +80,7 @@
            "var " x "=e_[" i "]\n"
            (map EVAL c)
            "}\n"))]
+    [`(number? ,x) (++ "(typeof " (EVAL x) "=='number')")]
+    [`(boolean? ,x) (++ "(typeof " (EVAL x) "=='boolean')")]
+    [`(procedure? ,x) (++ "(typeof " (EVAL x) "=='function')")]
     [`(,f ,@x) (++ (EVAL f) "(" (add-between (map EVAL x) ",") ")")]))

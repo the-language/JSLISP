@@ -76,4 +76,8 @@
      (++ "for " (id i) "," (id x) " in pairs(" (EVAL t) ")\n"
          (map EVAL c)
          "end \n")]
+    [`(number? ,x) (EVAL `(eq? (type ,x) "number"))]
+    [`(boolean? ,x) (EVAL `(eq? (type ,x) "boolean"))]
+    [`(procedure? ,x) (EVAL `(eq? (type ,x) "function"))]
+    ;[`(!/vectror? ,x) (EVAL `(eq? (type ,x) "table"))]
     [`(,f ,@x) (++ (EVAL f) "(" (add-between (map EVAL x) ",") ")")]))
