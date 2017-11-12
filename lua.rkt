@@ -39,7 +39,6 @@
       ",")
          "}")]
     [`(ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "]")]
-    [`(vector-ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "]")]
     [`(@ ,x ,i) (++ (EVAL x) "." (id i))]
     [`(if/begin ,b [,@t] [,@f])
      (++ "if " (EVAL b) " then\n"
