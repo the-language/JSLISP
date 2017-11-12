@@ -15,7 +15,7 @@
 ;;  You should have received a copy of the GNU Affero General Public License
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 (require "common.rkt")
-(provide EVAL)
+(provide (rename-out [EVAL js]))
 
 (define (EVAL x)
   (match x
