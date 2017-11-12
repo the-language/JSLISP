@@ -51,6 +51,7 @@
                                       [(return ,x)]
                                       [(return ,y)])))]
     [`(vector ,@x) (++ "{" (add-between (map EVAL x) ",") "}")]
+    [`(vector-length ,v) (++ "(#" (EVAL v) ")")]
     [`(apply ,f ,xs) (++ (EVAL f) "(unpack(" (EVAL xs) "))")]
     [`(+ ,@x) (++ "(" (add-between (map EVAL x) "+") ")")]
     [`(- ,@x) (++ "(" (add-between (map EVAL x) "-") ")")]

@@ -49,6 +49,7 @@
     [`(block ,@c) (EVAL `((lambda () ,@c)))]
     [`(if ,b ,x ,y) (++ "(" (EVAL b) "?" (EVAL x) ":" (EVAL y) ")")]
     [`(vector ,@x) (++ "[" (add-between (cons "null" (map EVAL x)) ",") "]")]
+    [`(vector-length ,v) (++ "(" (EVAL v) ".length-1)")]
     [`(apply ,f ,xs) (++ (EVAL f) ".apply(null," (EVAL xs) ")")] ;BUG this错误
     [`(+ ,@x) (++ "(" (add-between (map EVAL x) "+") ")")]
     [`(- ,@x) (++ "(" (add-between (map EVAL x) "-") ")")]
