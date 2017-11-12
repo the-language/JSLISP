@@ -35,7 +35,7 @@
     [`(lambda ,(list-rest a ... r) ,@s)
      (let ([r (id r)])
      (++ "(function(" (add-between (map id a) ",") "){\n"
-         "var " r "=[null]\n"
+         "var " r "=[]\n"
          "for(var i_=" (number->string (length a)) ";i_<arguments.length;i++){\n"
          r "[" r ".length]=arguments[i_]\n"
          "}\n"
@@ -49,6 +49,7 @@
                ",")
          "})")]
     [`(ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "]")]
+    [`(vector-ref ,v ,k) (++ (EVAL x) "[" (EVAL k) "]")]
     [`(@ ,x ,i) (++ (EVAL x) "." (id i))]
     [`(if/begin ,b [,@t] [,@f])
      (++ "if(" (EVAL b) "){\n"
@@ -58,8 +59,8 @@
          "}\n")]
     [`(block ,@c) (EVAL `((lambda () ,@c)))]
     [`(if ,b ,x ,y) (++ "(" (EVAL b) "?" (EVAL x) ":" (EVAL y) ")")]
-    [`(vector ,@x) (++ "[" (add-between (cons "null" (map EVAL x)) ",") "]")]
-    [`(vector-length ,v) (++ "(" (EVAL v) ".length-1)")]
+    [`(vector ,@x) (++ "[" (add-between (map EVAL x) ",") "]")]
+    [`(vector-length ,v) (++ "(" (EVAL v) ".length)")]
     [`(apply ,f ,xs) (++ (EVAL f) ".apply(null," (EVAL xs) ")")] ;BUG this错误
     [`(+ ,@x) (++ "(" (add-between (map EVAL x) "+") ")")]
     [`(- ,@x) (++ "(" (add-between (map EVAL x) "-") ")")]
@@ -78,7 +79,7 @@
     [`(vector-for ,i ,x ,xs ,@c)
      (let ([i (id i)] [x (id x)])
        (++ "var e_=" (EVAL xs) "\n" ; BUG 可能对GC支持不好
-           "for(var i_=1;i_<e_.length;i_++){\n"
+           "for(var i_=0;i_<e_.length;i_++){\n"
            "var " i "=i_\n"
            "var " x "=e_[i_]\n"
            (map EVAL c)

@@ -45,6 +45,7 @@
               ",")
          "}")]
     [`(ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "]")]
+    [`(vector-ref ,v ,k) (++ (EVAL v) "[" (EVAL k) "+1]")]
     [`(@ ,x ,i) (++ (EVAL x) "." (id i))]
     [`(if/begin ,b [,@t] [,@f])
      (++ "if " (EVAL b) " then\n"
@@ -74,12 +75,14 @@
     [`(eq? ,x ,y) (++ "(" (EVAL x) "==" (EVAL y) ")")]
     [`(noteq? ,x ,y) (++ "(" (EVAL x) "~=" (EVAL y) ")")]
     [`(vector-for ,i ,x ,xs ,@c)
-     (++ "for " (id i) "," (id x) " in ipairs(" (EVAL xs) ") do \n"
+     (++ "for _i," (id x) " in ipairs(" (EVAL xs) ") do \n"
+         "local " (id i) "=_i-1\n"
          (map EVAL c)
          "end\n")]
     [`(for ,i ,x ,t ,@c)
      (++ "for " (id i) "," (id x) " in pairs(" (EVAL t) ") do \n"
          "if " (id x) "~=nil then\n"
+         "if type(" (id i) ")==\"number\" then " (id i) "=" (id i) "-1 end\n"
          (map EVAL c)
          "end \n"
          "end \n")]
