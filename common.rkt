@@ -25,3 +25,9 @@
                       "_"
                       (number->string (char->integer x)))))
           (string->list (symbol->string x)))))
+(define ++
+  (case-lambda
+    [() ""]
+    [(x . xs) (if (list? x)
+                  (apply ++ (cons (apply ++ x) xs))
+                  (string-append x (apply ++ xs)))]))

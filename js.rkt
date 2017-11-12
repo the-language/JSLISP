@@ -24,35 +24,33 @@
     [(? string? x) (format "~s" x)]
     [#t "true"]
     [#f "false"]
-    [`(define ,i) (++ "local " (id i) "\n")]
-    [`(define ,i ,v) (++ "local " (id i) "=" (EVAL v) "\n")]
+    [`(define ,i) (++ "var " (id i) "\n")]
+    [`(define ,i ,v) (++ "var " (id i) "=" (EVAL v) "\n")]
     [`(set! ,x ,v) (++ (EVAL x) "=" (EVAL v) "\n")]
     [`(lambda (,a ...) ,s ...)
-     (++ "(function(" (add-between a ",") ")"
+     (++ "(function(" (add-between a ",") "){"
                                 (map EVAL s)
-                                "end)")]
+                                "})")]
     [`(return ,x) (++ "return " (EVAL x) "\n")]
     [`(! ,@v)
      (++ "{" (add-between
-      (map (match-lambda [`[,i ,v] (++ (id i) "=" (EVAL v))])
+      (map (match-lambda [`[,i ,v] (++ (id i) ":" (EVAL v))])
           v)
       ",")
          "}")]
     [`(ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "]")]
-    [`(vector-ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "+1]")]
+    [`(vector-ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "]")]
     [`(@ ,x ,i) (++ (EVAL x) "." (id i))]
     [`(if/begin ,b [,@t] [,@f])
-     (++ "if " (EVAL b) " then\n"
+     (++ "if(" (EVAL b) "){\n"
          (map EVAL t)
-         "else\n"
+         "}else{\n"
          (map EVAL f)
-         "end\n")]
+         "}\n")]
     [`(block ,@c) (EVAL `((lambda () ,@c)))]
-    [`(if ,b ,x ,y) (EVAL `(block (if/begin b
-                                      [(return ,x)]
-                                      [(return ,y)])))]
-    [`(vector ,@x) (++ "{" (add-between (map EVAL x) ",") "}")]
-    [`(apply ,f ,xs) (++ (EVAL f) "(unpack(" (EVAL xs) "))")]
+    [`(if ,b ,x ,y) (++ "(" (EVAL b) "?" (EVAL x) ":" (EVAL y) ")")]
+    [`(vector ,@x) (++ "[" (add-between (map EVAL x) ",") "]")]
+    [`(apply ,f ,xs) (++ (EVAL f) ".apply(null," (EVAL xs) ")")] ;BUG this错误
     [`(+ ,@x) (++ "(" (add-between (map EVAL x) "+") ")")]
     [`(- ,@x) (++ "(" (add-between (map EVAL x) "-") ")")]
     [`(* ,@x) (++ "(" (add-between (map EVAL x) "*") ")")]
@@ -62,9 +60,9 @@
     [`(= ,@x) (++ "(" (add-between (map EVAL x) "==") ")")]
     [`(<= ,@x) (++ "(" (add-between (map EVAL x) "<=") ")")]
     [`(>= ,@x) (++ "(" (add-between (map EVAL x) ">=") ")")]
-    [`(and ,@x) (++ "(" (add-between (map EVAL x) " and ") ")")]
-    [`(or ,@x) (++ "(" (add-between (map EVAL x) " or ") ")")]
-    [`(not ,x) (++ "(not " (EVAL x) ")")]
+    [`(and ,@x) (++ "(" (add-between (map EVAL x) "&&") ")")]
+    [`(or ,@x) (++ "(" (add-between (map EVAL x) "||") ")")]
+    [`(not ,x) (++ "(!" (EVAL x) ")")]
     [`(eq? ,x ,y) (++ "(" (EVAL x) "==" (EVAL y) ")")]
-    [`(noteq? ,x ,y) (++ "(" (EVAL x) "~=" (EVAL y) ")")]
+    [`(noteq? ,x ,y) (++ "(" (EVAL x) "!=" (EVAL y) ")")]
     [`(,f ,@x) (++ (EVAL f) "(" (add-between (map EVAL x) ",") ")")]))
