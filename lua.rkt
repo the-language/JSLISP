@@ -67,11 +67,11 @@
     [`(eq? ,x ,y) (++ "(" (EVAL x) "==" (EVAL y) ")")]
     [`(noteq? ,x ,y) (++ "(" (EVAL x) "~=" (EVAL y) ")")]
     [`(vector-for ,i ,x ,xs ,@c)
-     (++ "for " (id i) "," (id x) " in ipairs(" (EVAL xs) ")\n"
+     (++ "for " (id i) "," (id x) " in ipairs(" (EVAL xs) ") do \n"
          (map EVAL c)
          "end\n")]
     [`(for ,i ,x ,t ,@c)
-     (++ "for " (id i) "," (id x) " in pairs(" (EVAL t) ")\n"
+     (++ "for " (id i) "," (id x) " in pairs(" (EVAL t) ") do \n"
          "if " (id x) "~=nil then\n"
          (map EVAL c)
          "end \n"
