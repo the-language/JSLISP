@@ -78,7 +78,7 @@
                           (f (++ "(" xx "." (id i) ")"))))]
     [`(if/begin ,b [,@t] [,@fa])
      (EVAL b (λ (bb)
-               (++ "if(" bb "){\n"
+               (++ "if(" bb "!==false){\n"
                    (EVAL `(begin ,@t) ig)
                    "}else{\n"
                    (EVAL `(begin ,@fa) ig)
@@ -91,7 +91,7 @@
                                  (EVAL `(begin ,@xs) f))))]
     [`(if ,b ,x ,y)
      (EVAL b (λ (bb) (EVAL x (λ (xx) (EVAL y (λ (yy)
-                                               (++ "(" bb "?" xx ":" yy ")")))))))]
+                                               (++ "(" bb "!==false?" xx ":" yy ")")))))))]
     [`(vector ,@xs) (EVALxs EVAL xs (λ (xss) (f (++ "[" (add-between xss ",") "]"))))]
     [`(vector-length ,v) (EVAL v (λ (vv)
                                    (++ "(" vv ".length)")))]
