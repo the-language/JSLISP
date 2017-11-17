@@ -31,3 +31,23 @@
     [(x . xs) (if (list? x)
                   (apply ++ (cons (apply ++ x) xs))
                   (string-append x (apply ++ xs)))]))
+(define genvar!
+  (let ([c 0])
+    (λ ()
+      (set! c (+ c 1))
+      (string-append "T" (number->string c)))))
+(define (EVALxs EVAL xs f)
+  (if (null? xs)
+      (f '())
+      (EVAL (car xs) (λ (a) (EVALxs EVAL (cdr xs) (λ (d)
+                                                    (f (cons a d))))))))
+(define (+-*/ EVAL o xs f)
+  (EVALxs EVAL
+          xs
+          (λ (xss)
+            (f (++ "(" (add-between xss o) ")")))))
+(define (<>= EVAL o xs f)
+  (match xs
+    [`(,x ,y)
+     (EVAL x (λ (xx) (EVAL y (λ (yy)
+                              (f (++ "(" xx o yy ")"))))))]))

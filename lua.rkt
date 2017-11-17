@@ -17,78 +17,117 @@
 (require "common.rkt")
 (provide (rename-out [EVAL lua]))
 
-(define (EVAL x)
+(define undefined "nil")
+(define (ig x)
+  (if (eq? x undefined)
+             ""
+             (++ "type(" x ")\n")))
+
+(define (EVAL x f)
   (match x
-    [(? symbol? x) (id x)]
-    [(? number? x) (number->string x)]
-    [(? string? x) (format "~s" x)]
-    [#t "true"]
-    [#f "false"]
-    [`(define ,i) (++ "local " (id i) "\n")]
-    [`(define ,i ,v) (++ "local " (id i) "=" (EVAL v) "\n")]
-    [`(set! ,x ,v) (++ (EVAL x) "=" (EVAL v) "\n")]
-    [(cons 'λ x) (EVAL (cons 'lambda x))]
+    [(? symbol? x) (f (id x))]
+    [(? number? x) (f (number->string x))]
+    [(? string? x) (f (format "~s" x))]
+    [#t (f "true")]
+    [#f (f "false")]
+    [`(define ,i) (++ "local " (id i) "\n" (f undefined))]
+    [`(define ,i ,v) (EVAL v (λ (vv)
+                               (++ "local " (id i) "=" vv "\n" (f undefined))))]
+    [`(set! ,x ,v) (EVAL x (λ (xx) (EVAL v (λ (vv)
+                             (++ xx "=" vv "\n" (f undefined))))))]
+    [(cons 'λ x) (EVAL (cons 'lambda x) f)]
     [`(lambda (,a ...) ,@s)
-     (++ "(function(" (add-between (map id a) ",") ")\n"
-         (map EVAL s)
-         "end)")]
+     (f (++ "(function(" (add-between (map id a) ",") ")\n"
+            (EVAL `(begin ,@s) (λ (x) (++ "return " x "\n")))
+            "end)"))]
     [`(lambda ,(list-rest a ... r) ,@s)
-     (++ "(function(" (add-between (append (map id a) (list "...")) ",") ")\n"
-         "local " (id r) "={...}\n"
-         (map EVAL s)
-         "end)")]
-    [`(return ,x) (++ "return " (EVAL x) "\n")]
+     (f (++ "(function(" (add-between (append (map id a) (list "...")) ",") ")\n"
+            "local " (id r) "={...}\n"
+            (EVAL `(begin ,@s) (λ (x) (++ "return " x "\n")))
+            "end)"))]
+    [`(return ,x)
+     (EVAL x (λ (xx)
+               (++ "return " x "\n")))]
     [`(! ,@v)
-     (++ "{" (add-between
-              (map (match-lambda [`[,i ,v] (++ (id i) "=" (EVAL v))])
-                   v)
-              ",")
-         "}")]
-    [`(ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "]")]
-    [`(vector-ref ,v ,k) (++ (EVAL v) "[" (EVAL k) "+1]")]
-    [`(@ ,x ,i) (++ (EVAL x) "." (id i))]
-    [`(if/begin ,b [,@t] [,@f])
-     (++ "if " (EVAL b) " then\n"
-         (map EVAL t)
-         "else\n"
-         (map EVAL f)
-         "end\n")]
-    [`(block ,@c) (EVAL `((lambda () ,@c)))]
-    [`(if ,b ,x ,y) (EVAL `(block (if/begin b
-                                            [(return ,x)]
-                                            [(return ,y)])))]
-    [`(vector ,@x) (++ "{" (add-between (map EVAL x) ",") "}")]
-    [`(vector-length ,v) (++ "(#" (EVAL v) ")")]
-    [`(apply ,f ,xs) (++ (EVAL f) "(unpack(" (EVAL xs) "))")]
-    [`(+ ,@x) (++ "(" (add-between (map EVAL x) "+") ")")]
-    [`(- ,@x) (++ "(" (add-between (map EVAL x) "-") ")")]
-    [`(* ,@x) (++ "(" (add-between (map EVAL x) "*") ")")]
-    [`(/ ,@x) (++ "(" (add-between (map EVAL x) "/") ")")]
-    [`(< ,@x) (++ "(" (add-between (map EVAL x) "<") ")")]
-    [`(> ,@x) (++ "(" (add-between (map EVAL x) ">") ")")]
-    [`(= ,@x) (++ "(" (add-between (map EVAL x) "==") ")")]
-    [`(<= ,@x) (++ "(" (add-between (map EVAL x) "<=") ")")]
-    [`(>= ,@x) (++ "(" (add-between (map EVAL x) ">=") ")")]
-    [`(and ,@x) (++ "(" (add-between (map EVAL x) " and ") ")")]
-    [`(or ,@x) (++ "(" (add-between (map EVAL x) " or ") ")")]
-    [`(not ,x) (++ "(not " (EVAL x) ")")]
-    [`(eq? ,x ,y) (++ "(" (EVAL x) "==" (EVAL y) ")")]
-    [`(noteq? ,x ,y) (++ "(" (EVAL x) "~=" (EVAL y) ")")]
+     (let loop ([xs '()] [rs v])
+       (match rs
+         ['()
+          (f (++ "{"
+                 (add-between (map (match-lambda [`(,i . ,v) (++ i "=" v)]) xs) ",")
+                 "}"))]
+         [`([,i ,v] . ,rs)
+          (EVAL v (λ (vv)
+                    (loop (cons (cons (id i) vv) xs) rs)))]))]
+    [`(ref ,x ,k) (EVAL x (λ (xx) (EVAL k (λ (kk)
+                                            (f (++ xx "[" kk "]"))))))]
+    [`(vector-ref ,x ,k) (EVAL x (λ (xx) (EVAL k (λ (kk)
+                                                   (f (++ xx "[" kk "+1]"))))))]
+    [`(@ ,x ,i)
+     (EVAL x (λ (xx)
+               (f (++ xx "." (id i)))))]
+    [`(if/begin ,b [,@t] [,@fa])
+     (EVAL b (λ (bb)
+               (++ "if " bb " then\n"
+                   (EVAL `(begin ,@t) ig)
+                   "else\n"
+                   (EVAL `(begin ,@fa) ig)
+                   "end\n"
+                   (f undefined))))]
+    [`(begin ,x) (EVAL x f)]
+    [`(begin ,x ,@xs)
+     (EVAL
+      x
+      (λ (xx)
+        (++
+         (ig xx)
+         (EVAL `(begin ,@xs) f))))]
+    [`(if ,b ,x ,y)
+     (let ([v (genvar!)])
+       (EVAL
+        `(begin
+           (define v)
+           (if/begin ,b [(set! ,v ,x)] [(set! ,v ,y)])
+           ,(f v))
+        (λ (u) "")))]
+    [`(vector ,@xs)
+     (EVALxs EVAL xs (λ (xss) (f (++ "{" (add-between xss ",")))))]
+    [`(vector-length ,v) (EVAL v (λ (vv) (f (++ "(#" vv ")"))))]
+    [`(apply ,f ,xs) (EVAL f (λ (ff) (EVAL xs (λ (xss)
+                                                (f (++ ff "(unpack(" xss "))"))))))]
+    [`(+ ,@x) (+-*/ EVAL "+" x f)]
+    [`(- ,@x) (+-*/ EVAL "-" x f)]
+    [`(* ,@x) (+-*/ EVAL "*" x f)]
+    [`(/ ,@x) (+-*/ EVAL "/" x f)]
+    [`(< ,@x) (<>= EVAL "<" x f)]
+    [`(> ,@x) (<>= EVAL ">" x f)]
+    [`(= ,@x) (<>= EVAL "=" x f)]
+    [`(<= ,@x) (<>= EVAL "<=" x f)]
+    [`(>= ,@x) (<>= EVAL ">=" x f)]
+    [`(and ,@x) (+-*/ EVAL " and " x f)]
+    [`(or ,@x) (+-*/ EVAL " or " x f)]
+    [`(not ,x)
+     (EVAL x (λ (xx) (f (++ "(not " xx ")"))))]
+    [`(eq? ,x ,y) (EVAL `(= ,x ,y) f)]
+    [`(noteq? ,x ,y) (EVAL x (λ (xx) (EVAL y (λ (yy) (f (++ "(" xx "~=" yy ")"))))))]
     [`(vector-for ,i ,x ,xs ,@c)
-     (++ "for _i," (id x) " in ipairs(" (EVAL xs) ") do \n"
-         "local " (id i) "=_i-1\n"
-         (map EVAL c)
-         "end\n")]
+     (EVAL xs (λ (xss)
+                (++ "for _i," (id x) " in ipairs(" xss ") do \n"
+                    "local " (id i) "=_i-1\n"
+                    (EVAL `(begin ,@c) ig)
+                    "end\n"
+                    (f undefined))))]
     [`(for ,i ,x ,t ,@c)
-     (++ "for " (id i) "," (id x) " in pairs(" (EVAL t) ") do \n"
-         "if " (id x) "~=nil then\n"
-         "if type(" (id i) ")==\"number\" then " (id i) "=" (id i) "-1 end\n"
-         (map EVAL c)
-         "end \n"
-         "end \n")]
-    [`(number? ,x) (EVAL `(eq? (type ,x) "number"))]
-    [`(boolean? ,x) (EVAL `(eq? (type ,x) "boolean"))]
-    [`(procedure? ,x) (EVAL `(eq? (type ,x) "function"))]
-    [`(!/vectror? ,x) (EVAL `(eq? (type ,x) "table"))]
-    [`(ig ,x) (EVAL `(type ,x))]
-    [`(,f ,@x) (++ (EVAL f) "(" (add-between (map EVAL x) ",") ")")]))
+     (EVAL t (λ (tt)
+               (++ "for " (id i) "," (id x) " in pairs(" tt ") do \n"
+                   "if " (id x) "~=nil then\n"
+                   (EVAL `(begin ,@c) ig)
+                   "end \n"
+                   "end \n"
+                   (f undefined))))]
+    [`(number? ,x) (EVAL `(eq? (type ,x) "number") f)]
+    [`(boolean? ,x) (EVAL `(eq? (type ,x) "boolean") f)]
+    [`(procedure? ,x) (EVAL `(eq? (type ,x) "function") f)]
+    [`(!/vectror? ,x) (EVAL `(eq? (type ,x) "table") f)]
+    [`(,k ,@x)
+     (EVAL k (λ (kk) (EVALxs EVAL x (λ (xss)
+                                      (f (++ kk "(" (add-between xss ",") ")"))))))]))
