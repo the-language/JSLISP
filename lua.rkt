@@ -15,13 +15,18 @@
 ;;  You should have received a copy of the GNU Affero General Public License
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 (require "common.rkt")
-(provide (rename-out [EVAL lua]))
+(provide lua)
+(define (lua x) (EVAL x ig))
 
 (define undefined "nil")
 (define (ig x)
   (if (eq? x undefined)
-             ""
-             (++ "type(" x ")\n")))
+      ""
+      (++ "type(" x ")\n")))
+(define (with-genvar! f)
+  (let ([v (genvar!)])
+    (++ "local " v "\n"
+        (f v))))
 
 (define (EVAL x f)
   (match x
@@ -34,7 +39,7 @@
     [`(define ,i ,v) (EVAL v (λ (vv)
                                (++ "local " (id i) "=" vv "\n" (f undefined))))]
     [`(set! ,x ,v) (EVAL x (λ (xx) (EVAL v (λ (vv)
-                             (++ xx "=" vv "\n" (f undefined))))))]
+                                             (++ xx "=" vv "\n" (f undefined))))))]
     [(cons 'λ x) (EVAL (cons 'lambda x) f)]
     [`(lambda (,a ...) ,@s)
      (f (++ "(function(" (add-between (map id a) ",") ")\n"
@@ -45,9 +50,8 @@
             "local " (id r) "={...}\n"
             (EVAL `(begin ,@s) (λ (x) (++ "return " x "\n")))
             "end)"))]
-    [`(return ,x)
-     (EVAL x (λ (xx)
-               (++ "return " x "\n")))]
+    [`(return ,x) (EVAL x (λ (xx)
+                            (++ "return " x "\n")))]
     [`(! ,@v)
      (let loop ([xs '()] [rs v])
        (match rs
@@ -62,9 +66,8 @@
                                             (f (++ xx "[" kk "]"))))))]
     [`(vector-ref ,x ,k) (EVAL x (λ (xx) (EVAL k (λ (kk)
                                                    (f (++ xx "[" kk "+1]"))))))]
-    [`(@ ,x ,i)
-     (EVAL x (λ (xx)
-               (f (++ xx "." (id i)))))]
+    [`(@ ,x ,i) (EVAL x (λ (xx)
+                          (f (++ xx "." (id i)))))]
     [`(if/begin ,b [,@t] [,@fa])
      (EVAL b (λ (bb)
                (++ "if " bb " then\n"
@@ -74,23 +77,18 @@
                    "end\n"
                    (f undefined))))]
     [`(begin ,x) (EVAL x f)]
-    [`(begin ,x ,@xs)
-     (EVAL
-      x
-      (λ (xx)
-        (++
-         (ig xx)
-         (EVAL `(begin ,@xs) f))))]
+    [`(begin ,x ,@xs) (EVAL x (λ (xx)
+                                (++
+                                 (ig xx)
+                                 (EVAL `(begin ,@xs) f))))]
     [`(if ,b ,x ,y)
-     (let ([v (genvar!)])
-       (EVAL
-        `(begin
-           (define v)
-           (if/begin ,b [(set! ,v ,x)] [(set! ,v ,y)])
-           ,(f v))
-        (λ (u) "")))]
+     (with-genvar!
+         (λ (v)
+           (EVAL
+            `(if/begin ,b [(set! ,v ,x)] [(set! ,v ,y)])
+            (λ (u) (f v)))))]
     [`(vector ,@xs)
-     (EVALxs EVAL xs (λ (xss) (f (++ "{" (add-between xss ",")))))]
+     (EVALxs EVAL xs (λ (xss) (f (++ "{" (add-between xss ",") "}"))))]
     [`(vector-length ,v) (EVAL v (λ (vv) (f (++ "(#" vv ")"))))]
     [`(apply ,f ,xs) (EVAL f (λ (ff) (EVAL xs (λ (xss)
                                                 (f (++ ff "(unpack(" xss "))"))))))]
@@ -100,7 +98,7 @@
     [`(/ ,@x) (+-*/ EVAL "/" x f)]
     [`(< ,@x) (<>= EVAL "<" x f)]
     [`(> ,@x) (<>= EVAL ">" x f)]
-    [`(= ,@x) (<>= EVAL "=" x f)]
+    [`(= ,@x) (<>= EVAL "==" x f)]
     [`(<= ,@x) (<>= EVAL "<=" x f)]
     [`(>= ,@x) (<>= EVAL ">=" x f)]
     [`(and ,@x) (+-*/ EVAL " and " x f)]

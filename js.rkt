@@ -15,87 +15,136 @@
 ;;  You should have received a copy of the GNU Affero General Public License
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 (require "common.rkt")
-(provide (rename-out [EVAL js]))
+(provide js)
+(define (js x) (EVAL x ig))
 
-(define (EVAL x)
+(define undefined "undefined")
+(define (ig x)
+  (if (eq? x undefined)
+      ""
+      (++ x "\n")))
+(define (with-genvar! f)
+  (let ([v (genvar!)])
+    (++ "var " v "\n"
+        (f v))))
+(define (store! x f)
+  (let ([v (genvar!)])
+    (++ "var " v "=" x "\n"
+        (f v))))
+
+(define (EVAL x f)
   (match x
-    [(? symbol? x) (id x)]
-    [(? number? x) (number->string x)]
-    [(? string? x) (format "~s" x)]
-    [#t "true"]
-    [#f "false"]
-    [`(define ,i) (++ "var " (id i) "\n")]
-    [`(define ,i ,v) (++ "var " (id i) "=" (EVAL v) "\n")]
-    [`(set! ,x ,v) (++ (EVAL x) "=" (EVAL v) "\n")]
-    [(cons 'λ x) (EVAL (cons 'lambda x))]
+    [(? symbol? x) (f (id x))]
+    [(? number? x) (f (number->string x))]
+    [(? string? x) (f (format "~s" x))]
+    [#t (f "true")]
+    [#f (f "false")]
+    [`(define ,i) (++ "var " (id i) "\n" (f undefined))]
+    [`(define ,i ,v) (EVAL v (λ (vv)
+                               (++ "var " (id i) "=" vv "\n" (f undefined))))]
+    [`(set! ,x ,v) (EVAL x (λ (xx) (EVAL v (λ (vv)
+                                             (++ xx "=" vv "\n" (f undefined))))))]
+    [(cons 'λ x) (EVAL (cons 'lambda x) f)]
     [`(lambda (,a ...) ,@s)
-     (++ "(function(" (add-between (map id a) ",") "){"
-         (map EVAL s)
-         "})")]
+     (f (++ "(function(" (add-between (map id a) ",") "){"
+            (EVAL `(begin ,@s) (λ (x) (++ "return " x "\n")))
+            "})"))]
     [`(lambda ,(list-rest a ... r) ,@s)
-     (let ([r (id r)])
-     (++ "(function(" (add-between (map id a) ",") "){\n"
-         "var " r "=[]\n"
-         "for(var i_=" (number->string (length a)) ";i_<arguments.length;i++){\n"
-         r "[" r ".length]=arguments[i_]\n"
-         "}\n"
-         (map EVAL s)
-         "})"))]
-    [`(return ,x) (++ "return " (EVAL x) "\n")]
+     (f (let ([r (id r)])
+          (++ "(function(" (add-between (map id a) ",") "){\n"
+              "var " r "=[]\n"
+              "for(var i_=" (number->string (length a)) ";i_<arguments.length;i++){\n"
+              r "[" r ".length]=arguments[i_]\n"
+              "}\n"
+              (EVAL `(begin ,@s) (λ (x) (++ "return " x "\n")))
+              "})")))]
+    [`(return ,x) (EVAL x (λ (xx)
+                            (++ "return " x "\n")))]
     [`(! ,@v)
-     (++ "({" (add-between
-               (map (match-lambda [`[,i ,v] (++ (id i) ":" (EVAL v))])
-                    v)
-               ",")
-         "})")]
-    [`(ref ,x ,k) (++ (EVAL x) "[" (EVAL k) "]")]
-    [`(vector-ref ,v ,k) (++ (EVAL x) "[" (EVAL k) "]")]
-    [`(@ ,x ,i) (++ (EVAL x) "." (id i))]
-    [`(if/begin ,b [,@t] [,@f])
-     (++ "if(" (EVAL b) "){\n"
-         (map EVAL t)
-         "}else{\n"
-         (map EVAL f)
-         "}\n")]
-    [`(block ,@c) (EVAL `((lambda () ,@c)))]
-    [`(if ,b ,x ,y) (++ "(" (EVAL b) "?" (EVAL x) ":" (EVAL y) ")")]
-    [`(vector ,@x) (++ "[" (add-between (map EVAL x) ",") "]")]
-    [`(vector-length ,v) (++ "(" (EVAL v) ".length)")]
-    [`(apply ,f ,xs) (++ (EVAL f) ".apply(null," (EVAL xs) ")")] ;BUG this错误
-    [`(+ ,@x) (++ "(" (add-between (map EVAL x) "+") ")")]
-    [`(- ,@x) (++ "(" (add-between (map EVAL x) "-") ")")]
-    [`(* ,@x) (++ "(" (add-between (map EVAL x) "*") ")")]
-    [`(/ ,@x) (++ "(" (add-between (map EVAL x) "/") ")")]
-    [`(< ,@x) (++ "(" (add-between (map EVAL x) "<") ")")]
-    [`(> ,@x) (++ "(" (add-between (map EVAL x) ">") ")")]
-    [`(= ,@x) (++ "(" (add-between (map EVAL x) "==") ")")]
-    [`(<= ,@x) (++ "(" (add-between (map EVAL x) "<=") ")")]
-    [`(>= ,@x) (++ "(" (add-between (map EVAL x) ">=") ")")]
-    [`(and ,@x) (++ "(" (add-between (map EVAL x) "&&") ")")]
-    [`(or ,@x) (++ "(" (add-between (map EVAL x) "||") ")")]
-    [`(not ,x) (++ "(!" (EVAL x) ")")]
-    [`(eq? ,x ,y) (++ "(" (EVAL x) "==" (EVAL y) ")")]
-    [`(noteq? ,x ,y) (++ "(" (EVAL x) "!=" (EVAL y) ")")]
+     (let loop ([xs '()] [rs v])
+       (match rs
+         ['()
+          (f (++ "({"
+                 (add-between (map (match-lambda [`(,i . ,v) (++ i ":" v)]) xs) ",")
+                 "})"))]
+         [`([,i ,v] . ,rs)
+          (EVAL v (λ (vv)
+                    (loop (cons (cons (id i) vv) xs) rs)))]))]
+    [`(ref ,x ,k) (EVAL x (λ (xx) (EVAL k (λ (kk)
+                                            (f (++ xx "[" kk "]"))))))]
+    [`(vector-ref ,v ,k) (EVAL x (λ (xx) (EVAL k (λ (kk)
+                                                   (f (++ xx "[" kk "]"))))))]
+    [`(@ ,x ,i) (EVAL x (λ (xx)
+                          (f (++ "(" xx "." (id i) ")"))))]
+    [`(if/begin ,b [,@t] [,@fa])
+     (EVAL b (λ (bb)
+               (++ "if(" bb "){\n"
+                   (EVAL `(begin ,@t) ig)
+                   "}else{\n"
+                   (EVAL `(begin ,@fa) ig)
+                   "}\n"
+                   (f undefined))))]
+    [`(begin ,x) (EVAL x f)]
+    [`(begin ,x ,@xs) (EVAL x (λ (xx)
+                                (++
+                                 (ig xx)
+                                 (EVAL `(begin ,@xs) f))))]
+    [`(if ,b ,x ,y)
+     (EVAL b (λ (bb) (EVAL x (λ (xx) (EVAL y (λ (yy)
+                                               (++ "(" bb "?" xx ":" yy ")")))))))]
+    [`(vector ,@xs) (EVALxs EVAL xs (λ (xss) (f (++ "[" (add-between xss ",") "]"))))]
+    [`(vector-length ,v) (EVAL v (λ (vv)
+                                   (++ "(" vv ".length)")))]
+    [`(apply ,f ,xs) (EVAL f (λ (ff) (EVAL xs (λ (xss)
+                                                (f (++ ff ".apply(null," xss ")"))))))] ;BUG 'this'不正确
+    [`(+ ,@x) (+-*/ EVAL "+" x f)]
+    [`(- ,@x) (+-*/ EVAL "-" x f)]
+    [`(* ,@x) (+-*/ EVAL "*" x f)]
+    [`(/ ,@x) (+-*/ EVAL "/" x f)]
+    [`(< ,@x) (<>= EVAL "<" x f)]
+    [`(> ,@x) (<>= EVAL ">" x f)]
+    [`(= ,@x) (<>= EVAL "===" x f)]
+    [`(<= ,@x) (<>= EVAL "<=" x f)]
+    [`(>= ,@x) (<>= EVAL ">=" x f)]
+    [`(and ,@x) (+-*/ EVAL "&&" x f)]
+    [`(or ,@x) (+-*/ EVAL "||" x f)]
+    [`(not ,x)
+     (EVAL x (λ (xx) (f (++ "(! " xx ")"))))]
+    [`(eq? ,x ,y) (EVAL `(= ,x ,y) f)]
+    [`(noteq? ,x ,y) (EVAL x (λ (xx) (EVAL y (λ (yy) (f (++ "(" xx "!==" yy ")"))))))]
     [`(vector-for ,i ,x ,xs ,@c)
-     (let ([i (id i)] [x (id x)])
-       (++ "var e_=" (EVAL xs) "\n" ; BUG 可能对GC支持不好
-           "for(var i_=0;i_<e_.length;i_++){\n"
-           "var " i "=i_\n"
-           "var " x "=e_[i_]\n"
-           (map EVAL c)
-           "}\n"))]
+     (EVAL
+      xs
+      (λ (xss)
+        (store!
+         xss
+         (λ (t)
+           (let ([i (id i)] [x (id x)])
+             (++ "for(var i_=0;i_<" t ".length;i_++){\n"
+                 "var " i "=i_\n"
+                 "var " x "=" t "[i_]\n"
+                 (EVAL `(begin ,@c) ig)
+                 "}\n"
+                 (f undefined)))))))]
     [`(for ,i ,x ,t ,@c)
-     (let ([i (id i)] [x (id x)])
-       (++ "var e_=" (EVAL t) "\n" ; BUG 可能对GC支持不好
-           "for(var " i " in e_){\n"
-           "var " x "=e_[" i "]\n"
-           "if(" x "!=null){\n"
-           (map EVAL c)
-           "}\n"
-           "}\n"))]
-    [`(number? ,x) (++ "(typeof " (EVAL x) "=='number')")]
-    [`(boolean? ,x) (++ "(typeof " (EVAL x) "=='boolean')")]
-    [`(procedure? ,x) (++ "(typeof " (EVAL x) "=='function')")]
-    [`(!/vectror? ,x) (++ "(typeof " (EVAL x) "=='object')")]
-    [`(ig ,x) (++ (EVAL x) "\n")]
-    [`(,f ,@x) (++ (EVAL f) "(" (add-between (map EVAL x) ",") ")")]))
+     (EVAL
+      t
+      (λ (tt)
+        (store!
+         tt
+         (λ (t)
+           (let ([i (id i)] [x (id x)])
+             (++ "for(var " i " in " t "){\n"
+                 "var " x "=" t "[" i "]\n"
+                 "if(" x "!=null){\n"
+                 (EVAL `(begin ,@c) ig)
+                 "}\n"
+                 "}\n"
+                 (f undefined)))))))]
+    [`(number? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='number')")))]
+    [`(boolean? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='boolean')")))]
+    [`(procedure? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='function')")))]
+    [`(!/vectror? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='object')")))]
+    [`(,k ,@x)
+     (EVAL k (λ (kk) (EVALxs EVAL x (λ (xss)
+                                      (f (++ kk "(" (add-between xss ",") ")"))))))]))
