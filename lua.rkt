@@ -36,6 +36,7 @@
     [#t (f "true")]
     [#f (f "false")]
     [`(define ,i) (++ "local " (id i) "\n" (f undefined))]
+    [`(define ,(cons k xs) ,@v) (EVAL `(define ,k (lambda ,xs ,@v)) f)]
     [`(define ,i ,v) (EVAL v (λ (vv)
                                (++ "local " (id i) "=" vv "\n" (f undefined))))]
     [`(set! ,x ,v) (EVAL x (λ (xx) (EVAL v (λ (vv)
