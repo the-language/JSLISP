@@ -126,6 +126,7 @@
     [`(boolean? ,x) (EVAL `(eq? (type ,x) "boolean") f)]
     [`(procedure? ,x) (EVAL `(eq? (type ,x) "function") f)]
     [`(!/vectror? ,x) (EVAL `(eq? (type ,x) "table") f)]
+    [`(host  ,_ ... [lua ,v] ,_ ...) (f v)]
     [`(,k ,@x)
      (EVAL k (λ (kk) (EVALxs EVAL x (λ (xss)
                                       (f (++ kk "(" (add-between xss ",") ")"))))))]))

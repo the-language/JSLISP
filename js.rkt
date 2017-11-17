@@ -145,6 +145,7 @@
     [`(boolean? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='boolean')")))]
     [`(procedure? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='function')")))]
     [`(!/vectror? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='object')")))]
+    [`(host  ,_ ... [js ,v] ,_ ...) (f v)]
     [`(,k ,@x)
      (EVAL k (λ (kk) (EVALxs EVAL x (λ (xss)
                                       (f (++ kk "(" (add-between xss ",") ")"))))))]))
