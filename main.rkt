@@ -13,5 +13,4 @@
    (if (null? fs)
        (port->list)
        (foldl append '() (map file->list fs))))
- (map (λ (x) (displayln ((to) x))) v)
- (void))
+ (displayln ((to) (cons 'begin v))))
