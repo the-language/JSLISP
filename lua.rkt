@@ -122,7 +122,7 @@
     [`(for ,i ,x ,t ,@c)
      (EVAL t (λ (tt)
                (++ "for " (id i) "," (id x) " in pairs(" tt ") do \n"
-                   "if " (id x) "~=nil then\n"
+                   "if " (id x) "~=nil and type(" (id i) ")~=\"number\" then\n"
                    (EVAL `(begin ,@c) ig)
                    "end \n"
                    "end \n"

@@ -137,7 +137,7 @@
            (let ([i (id i)] [x (id x)])
              (++ "for(var " i " in " t "){\n"
                  "var " x "=" t "[" i "]\n"
-                 "if(" x "!=null){\n"
+                 "if(" x "!=null&&typeof " i "!=='number'){\n"
                  (EVAL `(begin ,@c) ig)
                  "}\n"
                  "}\n"
