@@ -157,6 +157,23 @@
     [`(!/vectror? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='object')")))]
     [`(vector? ,x) (EVAL x (λ (xx) (++ "(" xx " instanceof Array")))]
     [`(host ,@c) (match c [`(,_ ... [js ,v] ,_ ...) (f v)])]
+    [`(raise ,e) (EVAL e (λ (ee) (++ "throw "ee"\n")))]
+    [`(with-exception-handler ,handler ,thunk)
+     (EVAL
+      handler
+      (λ (h)
+        (EVAL
+         thunk
+         (λ (t)
+           (let ([e (genvar!)])
+             (with-genvar!
+                 (λ (x)
+                   (++ "try{\n"
+                       x"="t"()\n"
+                       "}catch("e"){\n"
+                       x"="h"("e")\n"
+                       "}\n"
+                       (f x)))))))))]
     [`(,k ,@x)
      (EVAL k (λ (kk) (EVALxs EVAL x (λ (xss)
                                       (f (++ kk "(" (add-between xss ",") ")"))))))]))

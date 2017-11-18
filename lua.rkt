@@ -72,7 +72,7 @@
     [`(vector-ref ,x ,k) (EVAL x (λ (xx) (EVAL k (λ (kk)
                                                    (f (++ xx "[" kk "+1]"))))))]
     [`(@ ,x ,@k) (EVAL x (λ (xx)
-                          (f (add-between (cons xx (map id k)) "."))))]
+                           (f (add-between (cons xx (map id k)) "."))))]
     [`(if/begin ,b [,@t] [,@fa])
      (EVAL b (λ (bb)
                (++ "if " bb " then\n"
@@ -142,6 +142,22 @@
      (EVAL x (λ (xx)
                (store! xx (λ (v) (f (++ "(" v "[1] or next(" v ")==nil)"))))))]
     [`(host ,@c) (match c [`(,_ ... [lua ,v] ,_ ...) (f v)])]
+    [`(raise ,e) (EVAL e (λ (ee)
+                           (++ "E_="ee"\n"
+                               "error(tostring(E_)..\" MapErr\")\n")))]
+    [`(with-exception-handler ,handler ,thunk)
+     (EVAL
+      handler
+      (λ (h)
+        (EVAL
+         thunk
+         (λ (t)
+           (let ([s (genvar!)] [x (genvar!)])
+             (++ "local "s","x"=pcall("t")\n"
+                 "if "s"==false and string.sub("x",-6)==\"MapErr\" then\n"
+                 x"="h"(E_)\n"
+                 "end\n"
+                 (f x)))))))]
     [`(,k ,@x)
      (EVAL k (λ (kk) (EVALxs EVAL x (λ (xss)
                                       (f (++ kk "(" (add-between xss ",") ")"))))))]))
