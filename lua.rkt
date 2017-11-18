@@ -141,6 +141,8 @@
     [`(vector? ,x)
      (EVAL x (λ (xx)
                (store! xx (λ (v) (f (++ "(" v "[1] or next(" v ")==nil)"))))))]
+    [`(number->string ,x) (EVAL x (λ (xx) (f (++ "tostring("xx")"))))]
+    [`(string->number ,x) (EVAL x (λ (xx) (f (++ "tonumber("xx")"))))]
     [`(host ,@c) (match c [`(,_ ... [lua ,v] ,_ ...) (f v)])]
     [`(raise ,e) (EVAL e (λ (ee)
                            (++ "E_="ee"\n"
@@ -154,7 +156,7 @@
          (λ (t)
            (let ([s (genvar!)] [x (genvar!)])
              (++ "local "s","x"=pcall("t")\n"
-                 "if "s"==false and string.sub("x",-6)==\"MapErr\" then\n"
+                 "if not "s" and string.sub("x",-6)==\"MapErr\" then\n"
                  x"="h"(E_)\n"
                  "end\n"
                  (f x)))))))]

@@ -150,12 +150,14 @@
                                                   (EVAL `(begin ,@c) ig)
                                                   "}\n"
                                                   (f undefined)))))))))]
-    [`(number? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='number')")))]
-    [`(boolean? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='boolean')")))]
-    [`(procedure? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='function')")))]
-    [`(string? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='string')")))]
-    [`(!/vectror? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='object')")))]
-    [`(vector? ,x) (EVAL x (λ (xx) (++ "(" xx " instanceof Array")))]
+    [`(number? ,x) (EVAL x (λ (xx) (f (++ "(typeof " xx "=='number')"))))]
+    [`(boolean? ,x) (EVAL x (λ (xx) (f (++ "(typeof " xx "=='boolean')"))))]
+    [`(procedure? ,x) (EVAL x (λ (xx) (f (++ "(typeof " xx "=='function')"))))]
+    [`(string? ,x) (EVAL x (λ (xx) (f (++ "(typeof " xx "=='string')"))))]
+    [`(!/vectror? ,x) (EVAL x (λ (xx) (f (++ "(typeof " xx "=='object')"))))]
+    [`(vector? ,x) (EVAL x (λ (xx) (f (++ "(" xx " instanceof Array"))))]
+    [`(number->string ,x) (EVAL x (λ (xx) (f (++ xx".toString()"))))]
+    [`(string->number ,x) (EVAL x (λ (xx) (f (++ "parseFloat("xx")"))))]
     [`(host ,@c) (match c [`(,_ ... [js ,v] ,_ ...) (f v)])]
     [`(raise ,e) (EVAL e (λ (ee) (++ "throw "ee"\n")))]
     [`(with-exception-handler ,handler ,thunk)
