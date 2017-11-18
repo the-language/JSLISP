@@ -76,7 +76,7 @@
     [`(vector-ref ,v ,k) (EVAL x (λ (xx) (EVAL k (λ (kk)
                                                    (f (++ xx "[" kk "]"))))))]
     [`(@ ,x ,@k) (EVAL x (λ (xx)
-                          (f (add-between (cons xx (map id k)) "."))))]
+                           (f (add-between (cons xx (map id k)) "."))))]
     [`(if/begin ,b [,@t] [,@fa])
      (EVAL b (λ (bb)
                (++ "if(" bb "!==false){\n"
@@ -142,6 +142,14 @@
                  "}\n"
                  "}\n"
                  (f undefined)))))))]
+    [`(for-from-to ,x ,i ,a ,@c)
+     (EVAL i (λ (ii) (EVAL a (λ (aa)
+                               (let ([x (id x)])
+                                 (store! aa (λ (aa)
+                                              (++ "for(var "x"="ii";"x"<="aa";"x"++){\n"
+                                                  (EVAL `(begin ,@c) ig)
+                                                  "}\n"
+                                                  (f undefined)))))))))]
     [`(number? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='number')")))]
     [`(boolean? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='boolean')")))]
     [`(procedure? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='function')")))]

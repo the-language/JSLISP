@@ -114,19 +114,25 @@
     [`(noteq? ,x ,y) (EVAL x (λ (xx) (EVAL y (λ (yy) (f (++ "(" xx "~=" yy ")"))))))]
     [`(vector-for ,i ,x ,xs ,@c)
      (EVAL xs (λ (xss)
-                (++ "for _i," (id x) " in ipairs(" xss ") do \n"
+                (++ "for _i," (id x) " in ipairs(" xss ") do\n"
                     "local " (id i) "=_i-1\n"
                     (EVAL `(begin ,@c) ig)
                     "end\n"
                     (f undefined))))]
     [`(for ,i ,x ,t ,@c)
      (EVAL t (λ (tt)
-               (++ "for " (id i) "," (id x) " in pairs(" tt ") do \n"
+               (++ "for " (id i) "," (id x) " in pairs(" tt ") do\n"
                    "if " (id x) "~=nil and type(" (id i) ")~=\"number\" then\n"
                    (EVAL `(begin ,@c) ig)
                    "end \n"
                    "end \n"
                    (f undefined))))]
+    [`(for-from-to ,x ,i ,a ,@c)
+     (EVAL i (λ (ii) (EVAL a (λ (aa)
+                               (++ "for " (id x) "=" ii "," aa " do\n"
+                                   (EVAL `(begin ,@c) ig)
+                                   "end \n"
+                                   (f undefined))))))]
     [`(number? ,x) (EVAL `(eq? (type ,x) "number") f)]
     [`(boolean? ,x) (EVAL `(eq? (type ,x) "boolean") f)]
     [`(procedure? ,x) (EVAL `(eq? (type ,x) "function") f)]
