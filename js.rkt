@@ -145,7 +145,9 @@
     [`(number? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='number')")))]
     [`(boolean? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='boolean')")))]
     [`(procedure? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='function')")))]
+    [`(string? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='string')")))]
     [`(!/vectror? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='object')")))]
+    [`(vector? ,x) (EVAL x (λ (xx) (++ "(" xx " instanceof Array")))]
     [`(host  ,_ ... [js ,v] ,_ ...) (f v)]
     [`(,k ,@x)
      (EVAL k (λ (kk) (EVALxs EVAL x (λ (xss)
