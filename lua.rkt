@@ -67,8 +67,8 @@
                                             (f (++ xx "[" kk "]"))))))]
     [`(vector-ref ,x ,k) (EVAL x (λ (xx) (EVAL k (λ (kk)
                                                    (f (++ xx "[" kk "+1]"))))))]
-    [`(@ ,x ,i) (EVAL x (λ (xx)
-                          (f (++ xx "." (id i)))))]
+    [`(@ ,x ,@k) (EVAL x (λ (xx)
+                          (f (add-between (cons xx (map id k)) "."))))]
     [`(if/begin ,b [,@t] [,@fa])
      (EVAL b (λ (bb)
                (++ "if " bb " then\n"

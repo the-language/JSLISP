@@ -75,8 +75,8 @@
                                             (f (++ xx "[" kk "]"))))))]
     [`(vector-ref ,v ,k) (EVAL x (λ (xx) (EVAL k (λ (kk)
                                                    (f (++ xx "[" kk "]"))))))]
-    [`(@ ,x ,i) (EVAL x (λ (xx)
-                          (f (++ "(" xx "." (id i) ")"))))]
+    [`(@ ,x ,@k) (EVAL x (λ (xx)
+                          (f (add-between (cons xx (map id k)) "."))))]
     [`(if/begin ,b [,@t] [,@fa])
      (EVAL b (λ (bb)
                (++ "if(" bb "!==false){\n"
@@ -95,7 +95,7 @@
                                                (++ "(" bb "!==false?" xx ":" yy ")")))))))]
     [`(vector ,@xs) (EVALxs EVAL xs (λ (xss) (f (++ "[" (add-between xss ",") "]"))))]
     [`(vector-length ,v) (EVAL v (λ (vv)
-                                   (++ "(" vv ".length)")))]
+                                   (++ vv ".length")))]
     [`(apply ,f ,xs) (EVAL f (λ (ff) (EVAL xs (λ (xss)
                                                 (f (++ ff ".apply(null," xss ")"))))))] ;BUG 'this'不正确
     [`(+ ,@x) (+-*/ EVAL "+" x f)]
