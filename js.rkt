@@ -156,7 +156,7 @@
     [`(string? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='string')")))]
     [`(!/vectror? ,x) (EVAL x (λ (xx) (++ "(typeof " xx "=='object')")))]
     [`(vector? ,x) (EVAL x (λ (xx) (++ "(" xx " instanceof Array")))]
-    [`(host  ,_ ... [js ,v] ,_ ...) (f v)]
+    [`(host ,@c) (match c [`(,_ ... [js ,v] ,_ ...) (f v)])]
     [`(,k ,@x)
      (EVAL k (λ (kk) (EVALxs EVAL x (λ (xss)
                                       (f (++ kk "(" (add-between xss ",") ")"))))))]))

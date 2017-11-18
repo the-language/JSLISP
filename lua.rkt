@@ -141,7 +141,7 @@
     [`(vector? ,x)
      (EVAL x (λ (xx)
                (store! xx (λ (v) (f (++ "(" v "[1] or next(" v ")==nil)"))))))]
-    [`(host  ,_ ... [lua ,v] ,_ ...) (f v)]
+    [`(host ,@c) (match c [`(,_ ... [lua ,v] ,_ ...) (f v)])]
     [`(,k ,@x)
      (EVAL k (λ (kk) (EVALxs EVAL x (λ (xss)
                                       (f (++ kk "(" (add-between xss ",") ")"))))))]))
