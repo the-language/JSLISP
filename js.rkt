@@ -186,6 +186,11 @@
     [`(assert ,x) (EVAL `(when (not ,x)
                            (raise "assertion failed!"))
                         f)]
+    [`(while ,b ,@c) (EVAL b (λ (bb) (++ "while("bb"!==false){\n"
+                         (EVAL `(begin ,@c) ig)
+                         "}\n"
+                         (f undefined))))]
+    [`(until ,b ,@c) (EVAL `(while (not ,b ,@c)) f)]
     [`(,k ,@x)
      (EVAL k (λ (kk) (EVALxs EVAL x (λ (xss)
                                       (f (++ kk "(" (add-between xss ",") ")"))))))]))
