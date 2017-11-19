@@ -73,7 +73,7 @@
                     (loop (cons (cons (id i) vv) xs) rs)))]))]
     [`(ref ,x ,k) (EVAL x (λ (xx) (EVAL k (λ (kk)
                                             (f (++ xx "[" kk "]"))))))]
-    [`(vector-ref ,v ,k) (EVAL x (λ (xx) (EVAL k (λ (kk)
+    [`(vector-ref ,x ,k) (EVAL x (λ (xx) (EVAL k (λ (kk)
                                                    (f (++ xx "[" kk "]"))))))]
     [`(@ ,x ,@k) (EVAL x (λ (xx)
                            (f (add-between (cons xx (map id k)) "."))))]
