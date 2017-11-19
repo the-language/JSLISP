@@ -92,6 +92,7 @@
            (EVAL
             `(if/begin ,b [(set! ,v ,x)] [(set! ,v ,y)])
             (λ (u) (f v)))))]
+    ['(genval) (EVAL '(vector) f)]
     [`(vector ,@xs)
      (EVALxs EVAL xs (λ (xss) (f (++ "{" (add-between xss ",") "}"))))]
     [`(vector-length ,v) (EVAL v (λ (vv) (f (++ "(#" vv ")"))))]

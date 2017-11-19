@@ -23,3 +23,5 @@ Map                          | Lua                         |               Javas
 + 所有primitive不是值
 + 没有宏
 + 数字只有float
++ define前不能使用这个值
++ ...

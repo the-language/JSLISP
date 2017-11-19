@@ -93,6 +93,7 @@
     [`(if ,b ,x ,y)
      (EVAL b (λ (bb) (EVAL x (λ (xx) (EVAL y (λ (yy)
                                                (++ "(" bb "!==false?" xx ":" yy ")")))))))]
+    ['(genval) (EVAL '(vector) f)]
     [`(vector ,@xs) (EVALxs EVAL xs (λ (xss) (f (++ "[" (add-between xss ",") "]"))))]
     [`(vector-length ,v) (EVAL v (λ (vv)
                                    (++ vv ".length")))]
