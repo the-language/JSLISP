@@ -144,7 +144,7 @@
     [`(boolean? ,x) (EVAL `(eq? (type ,x) "boolean") f)]
     [`(procedure? ,x) (EVAL `(eq? (type ,x) "function") f)]
     [`(string? ,x) (EVAL `(eq? (type ,x) "string") f)]
-    [`(!/vectror? ,x) (EVAL `(eq? (type ,x) "table") f)]
+    [`(!/vector? ,x) (EVAL `(eq? (type ,x) "table") f)]
     [`(vector? ,x)
      (EVAL x (λ (xx)
                (store! xx (λ (v) (f (++ "(" v "[1] or next(" v ")==nil)"))))))]

@@ -161,7 +161,7 @@
     [`(boolean? ,x) (EVAL x (λ (xx) (f (++ "(typeof " xx "=='boolean')"))))]
     [`(procedure? ,x) (EVAL x (λ (xx) (f (++ "(typeof " xx "=='function')"))))]
     [`(string? ,x) (EVAL x (λ (xx) (f (++ "(typeof " xx "=='string')"))))]
-    [`(!/vectror? ,x) (EVAL x (λ (xx) (f (++ "(typeof " xx "=='object')"))))]
+    [`(!/vector? ,x) (EVAL x (λ (xx) (f (++ "(typeof " xx "=='object')"))))]
     [`(vector? ,x) (EVAL x (λ (xx) (f (++ "(" xx " instanceof Array"))))]
     [`(number->string ,x) (EVAL x (λ (xx) (f (++ xx".toString()"))))]
     [`(string->number ,x) (EVAL x (λ (xx) (f (++ "parseFloat("xx")"))))]
