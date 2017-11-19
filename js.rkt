@@ -47,7 +47,7 @@
                                              (++ xx "=" vv "\n" (f undefined))))))]
     [(cons 'λ x) (EVAL (cons 'lambda x) f)]
     [`(lambda (,a ...) ,@s)
-     (f (++ "(function(" (add-between (map id a) ",") "){"
+     (f (++ "(function(" (add-between (map id a) ",") "){\n"
             (EVAL `(begin ,@s) (λ (x) (++ "return " x "\n")))
             "})"))]
     [`(lambda ,(list-rest a ... r) ,@s)
