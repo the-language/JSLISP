@@ -75,10 +75,16 @@
                            (f (add-between (cons xx (map id k)) "."))))]
     [`(if/begin ,b [,@t] [,@fa])
      (EVAL b (λ (bb)
-               (++ "if " bb " then\n"
+               (++ "if "bb"~=false then\n"
                    (EVAL `(begin ,@t) ig)
                    "else\n"
                    (EVAL `(begin ,@fa) ig)
+                   "end\n"
+                   (f undefined))))]
+    [`(when ,t ,@b)
+     (EVAL t (λ (tt)
+               (++ "if "tt"~=false then\n"
+                   (EVAL `(begin ,@b) ig)
                    "end\n"
                    (f undefined))))]
     [`(begin ,x) (EVAL x f)]
@@ -161,6 +167,8 @@
                  x"="h"(E_)\n"
                  "end\n"
                  (f x)))))))]
+    [`(assert ,x) (EVAL x (λ (xx) (++ "assert("xx")\n"
+                                      (f undefined))))]
     [`(,k ,@x)
      (EVAL k (λ (kk) (EVALxs EVAL x (λ (xss)
                                       (f (++ kk "(" (add-between xss ",") ")"))))))]))
