@@ -169,11 +169,6 @@
                  (f x)))))))]
     [`(assert ,x) (EVAL x (λ (xx) (++ "assert("xx")\n"
                                       (f undefined))))]
-    [`(while ,b ,@c) (EVAL b (λ (bb) (++ "while "bb"~=false do\n"
-                         (EVAL `(begin ,@c) ig)
-                         "end\n"
-                         (f undefined))))]
-    [`(until ,b ,@c) (EVAL `(while (not ,b ,@c)) f)]
     [`(,k ,@x)
      (EVAL k (λ (kk) (EVALxs EVAL x (λ (xss)
                                       (f (++ kk "(" (add-between xss ",") ")"))))))]))

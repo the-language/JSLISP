@@ -152,7 +152,8 @@
     [`(for-from-to ,x ,i ,a ,@c)
      (EVAL i (λ (ii) (EVAL a (λ (aa)
                                (let ([x (id x)])
-                                 (store! aa (λ (aa)
+                                 (store! aa
+                                         (λ (aa)
                                               (++ "for(var "x"="ii";"x"<="aa";"x"++){\n"
                                                   (EVAL `(begin ,@c) ig)
                                                   "}\n"
@@ -162,7 +163,7 @@
     [`(procedure? ,x) (EVAL x (λ (xx) (f (++ "(typeof " xx "=='function')"))))]
     [`(string? ,x) (EVAL x (λ (xx) (f (++ "(typeof " xx "=='string')"))))]
     [`(!/vector? ,x) (EVAL x (λ (xx) (f (++ "(typeof " xx "=='object')"))))]
-    [`(vector? ,x) (EVAL x (λ (xx) (f (++ "(" xx " instanceof Array"))))]
+    [`(vector? ,x) (EVAL x (λ (xx) (f (++ "(" xx " instanceof Array)"))))]
     [`(number->string ,x) (EVAL x (λ (xx) (f (++ xx".toString()"))))]
     [`(string->number ,x) (EVAL x (λ (xx) (f (++ "parseFloat("xx")"))))]
     [`(host ,@c) (match c [`(,_ ... [js ,v] ,_ ...) (f v)])]
@@ -186,11 +187,6 @@
     [`(assert ,x) (EVAL `(when (not ,x)
                            (raise "assertion failed!"))
                         f)]
-    [`(while ,b ,@c) (EVAL b (λ (bb) (++ "while("bb"!==false){\n"
-                         (EVAL `(begin ,@c) ig)
-                         "}\n"
-                         (f undefined))))]
-    [`(until ,b ,@c) (EVAL `(while (not ,b ,@c)) f)]
     [`(,k ,@x)
      (EVAL k (λ (kk) (EVALxs EVAL x (λ (xss)
                                       (f (++ kk "(" (add-between xss ",") ")"))))))]))
