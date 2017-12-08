@@ -47,6 +47,23 @@
                 (! xs
                    (λ (xs)
                      (k (cons (cons (id (first x)) v) xs)))))))))
+(define (DEFINE xs k)
+  (cond
+    [(null? (cdr xs)) (++ "local "(id (car xs))"\n"(k undefined Tpure))]
+    [(pair? (car xs))
+     (let ([a (car xs)])
+       (DEFINE (list (car a) (cons 'λ (cons (cdr a) (cdr xs)))) k))]
+    [else (EVAL (second xs)
+                (λ (x)
+                  (++ "local "(id (first xs))"="x"\n"
+                      (k undefined Tpure))))]))
+(define (LAMBDA xs k)
+  (let ([args (car xs)] [body (cdr xs)])
+  (if (list? args)
+(k (++ "(function("(add-between (map id args) ",")")\n"
+       
+      (LAMBDA... args body k)
+      ;WIP
 (define (EVAL x f)
   (cond
     [(pair? x) (APPLY (car x) (cdr x) f)]
@@ -133,3 +150,23 @@
     [(eq? f 'vector)
      (EVALxs xs (λ (xs)
                   (k (++ "{"(add-between xs ",")"}") Texp)))]
+    [(eq? f 'length)
+     (EVAL (first xs) (λ (x t)
+                        (k (++ "(#"x")") Texp)))]
+    
+    [(eq? f '+) (+-*/ "+" xs k)]
+    [(eq? f '-) (+-*/ "-" xs k)]
+    [(eq? f '*) (+-*/ "*" xs k)]
+    [(eq? f '/) (+-*/ "/" xs k)]
+    [(eq? f '<) (<>= "<" xs k)]
+    [(eq? f '>) (<>= ">" xs k)]
+    [(or (eq? f 'eq?) (eq? f '=)) (<>= "==" xs k)]
+    [(eq? f '!=) (<>= "~=" xs k)]
+    [(eq? f '<=) (<>= "<=" xs k)]
+    [(eq? f '>=) (<>= ">=" xs k)]
+    [(eq? f 'and) (<>= "&&" xs k)]
+    [(eq? f 'or) (<>= "||" xs k)]
+    [(eq? f 'not)
+     (EVAL (first xs) (λ (x)
+                        (k (++ "(not "x")") Texp)))]))
+(define (lua x) (EVAL x ig))

@@ -206,6 +206,9 @@
     [(eq? f 'object/vector?) (TYPE? "object" (first xs) k)]
     [(eq? f 'vector?) (EVAL (first xs) (λ (x)
                                          (k (++ "("x" instanceof Array)"))))]
+    [(eq? f 'undefined?) (EVAL (first xs)
+                               (λ (x)
+                                 (k (++ "("x"===null)"))))]
     [(or (eq? f '->string) (eq? f 'number->string))
      (EVAL (first xs) (λ (x)
                         (k (++ "String("x")"))))]
@@ -226,9 +229,6 @@
                        (λ (xs)
                          (k (++ "(new "x"("(add-between xs ",")"))")))))))]
     [(eq? f 'newtype) (k "(function(){})")]
-    [(eq? f 'undefined?) (EVAL (first xs)
-                               (λ (x)
-                                 (k (++ "("x"===null)"))))]
     [(eq? f 'raise) (EVAL (first xs)
                           (λ (x)
                             (++ "throw "x N)))]
