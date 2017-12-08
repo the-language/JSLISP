@@ -38,4 +38,5 @@
     [(list? (car xs)) (apply ++ (append (car xs) (cdr xs)))]
     [else (string-append (car xs) (apply ++ (cdr xs)))]))
 (define gensym! gensym)
+(define (float->string x) (number->string (exact->inexact x)))
 (define js ((λ () (include "js.scm") js)))
