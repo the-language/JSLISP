@@ -19,6 +19,8 @@
   (begin
     (check-equal? (f (quote src)) dist) ...))
 (test
- js
- [(λ xs xs) "(function(...xs){return xs;});"]
+ map
+ [((λ xs xs)) '((λ xs xs))]
+ [((begin (define (x) (x))) (x)) '((define x (λ () (x))) (x))]
+ [((λ () (if #t 0 1))) '((λ () (define g1) (if/void #t ((set! g1 0)) ((set! g1 1))) g1))]
  )

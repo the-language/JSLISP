@@ -13,7 +13,7 @@
 
 ;;  You should have received a copy of the GNU Affero General Public License
 ;;  along with this program.  If not, see <http://www.gnu.org/licenses/>.
-(provide js)
+(provide map)
 (define chars-num (set #\1 #\2 #\3 #\4 #\5 #\6 #\7 #\8 #\9 #\0))
 (define chars-abc
   (set #\q #\w #\e #\r #\t #\y #\u #\i #\o #\p #\a #\s #\d #\f #\g #\h #\j #\k #\l #\z #\x #\c #\v #\b #\n #\m
@@ -37,7 +37,11 @@
     [(null? xs) ""]
     [(list? (car xs)) (apply ++ (append (car xs) (cdr xs)))]
     [else (string-append (car xs) (apply ++ (cdr xs)))]))
+(define call/gensym
+  (let ([c 0])
+    (λ (f)
+      (set! c (+ c 1))
+      (f (string->symbol (string-append "g" (number->string c)))))))
 (define gensym! gensym)
 (define (float->string x) (number->string (exact->inexact x)))
-(define js ((λ () (include "js.scm") js)))
-(define lua ((λ () (include "lua.scm") lua)))
+(define map ((λ () (include "map.scm") map)))
