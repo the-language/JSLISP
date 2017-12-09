@@ -23,4 +23,9 @@
  [((λ xs xs)) '((λ xs xs))]
  [((begin (define (x) (x))) (x)) '((define x (λ () (x))) (x))]
  [((λ () (if #t 0 1))) '((λ () (define g1) (if/void #t ((set! g1 0)) ((set! g1 1))) g1))]
+ [((for-object [k v _G]
+               (begin
+                 (print k))
+               (print v))) '((for-object (k v _G) (print k) (print v)))]
+ [((or (if #t #t #t) (if #t #t #t))) '((or (if #t #t #t) (if #t #t #t)))]
  )

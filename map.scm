@@ -29,14 +29,14 @@
           (if b
               (call/gensym
                (λ (r)
-                 (append
-                  (list (list 'define r))
+                 (cons
+                  (list 'define r)
                   (EVAL (first xs) #t
                         (λ (b)
-                          (append
-                           (list (list 'if/void b
-                                      (EVAL (second xs) #t (<- r))
-                                      (EVAL (third xs) #t (<- r))))
+                          (cons
+                           (list 'if/void b
+                                 (EVAL (second xs) #t (<- r))
+                                 (EVAL (third xs) #t (<- r)))
                            (k r)))))))
               (EVAL (first xs) #f
                     (λ (b)
@@ -49,17 +49,17 @@
           (must b)
           (EVAL (second xs) #t
                 (λ (v)
-                  (append
-                   (list (list 'set! (first xs) v))
-                         (k undefined))))]
+                  (cons
+                   (list 'set! (first xs) v)
+                   (k undefined))))]
          [(eq? f 'define)
           (must b)
           (let ([v (car xs)])
-          (if (pair? v)
-              (EVAL (list 'define (car v) (cons 'λ (cons (cdr v) (cdr xs)))) b k)
-              (append
-               (list (list 'define v (second xs)))
-                     (k undefined))))]
+            (if (pair? v)
+                (EVAL (list 'define (car v) (cons 'λ (cons (cdr v) (cdr xs)))) b k)
+                (cons
+                 (list 'define v (second xs))
+                 (k undefined))))]
          [(eq? f 'return)
           (must b)
           (list (list 'return (first xs)))]
@@ -77,7 +77,16 @@
                        (BEGIN (cdr xs) b k)))))]
          [(eq? f 'λ)
           (k (cons 'λ (cons (car xs)
-                   (BEGIN (cdr xs) #t list))))]
+                            (BEGIN (cdr xs) #t list))))]
+         [(or (eq? f 'for-object) (eq? f 'for-vector))
+          (must b)
+          (let ([x (car xs)] [xs (cdr xs)])
+            (let ([i (first x)] [v (second x)] [o (third x)])
+              (EVAL o b
+                    (λ (o)
+                      (cons (cons f
+                                  (cons (list i v o) (BEGIN xs #t ig)))
+                            (k undefined))))))]
          [else (EVAL f b
                      (λ (f)
                        (EVALxs xs b
@@ -93,4 +102,4 @@
                         (k (cons a d))))))))
 (define (BEGIN xs b k)
   (EVAL (cons 'begin xs) b k))
-(define (map xs) (BEGIN xs #t list))
+(define (map xs) (BEGIN xs #t (λ (x) (if (eq? x 'undefined) '() (list x)))))
