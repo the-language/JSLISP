@@ -30,7 +30,8 @@
     [(null? args) ""]
     [(null? (cdr args)) (**var (car args))]
     [else (++ (**var (car args))","(%**lam-arg (cdr args)))]))
-(define (**apply f xs) (++ f"("(foldr string-append "" (add-between xs ","))))
+(define (%**app xs) (foldr string-append "" (add-between xs ",")))
+(define (**apply f xs) (++ f"("(%**app xs)")"))
 (define (*js-typeof x) (++ "(typeof "x")"))
 (define (*procedure? x) (++ "(typeof "x"=='function')"))
 (define (*string? x) (++ "(typeof "x"=='string')"))
@@ -61,3 +62,9 @@
 (define *true "true")
 (define (*js-if b x y) (++ "("b"?"x":"y")"))
 (define (*if b x y) (*js-if (*not-eq? b *false) x y))
+(define (**set! v x) (**set-left! (**var v) x))
+(define (**set-left! v x) (++ v"="x))
+(define (/ o k) (++ o"."(**var k)))
+(define (object-ref o k) (++ o"["k"]"))
+(define (vector-ref v k) (++ v"["k"]"))
+(define (: o k xs) (++ o"."(**var k)"("(%**app xs)")"))
