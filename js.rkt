@@ -18,12 +18,12 @@
 (define (**return x) (++ "return "x))
 (define (**lambda args body)
   (++ "(function("(%**lam-arg args)"){"
-      (%**block body)
+      (**top body)
       "})"))
-(define (%**block xs)
+(define (**top xs)
   (if (null? (cdr xs))
       (++ (car xs)";")
-      (++ (car xs)";"(%**block (cdr xs)))))
+      (++ (car xs)";"(**top (cdr xs)))))
 (define (%**lam-arg args)
   (cond
     [(symbol? args) (++ (**var args)"...")]
@@ -38,7 +38,7 @@
 (define (*object/vector? x) (++ "(typeof "x"=='object')"))
 (define (*is-a? x t) (++ "("x" instanceof "t")"))
 (define (*vector? x) (*is-a? x "Array"))
-(define (**c-for s1 s2 s3 xs) (++ "for("s1";"s2";"s3"){"(%**block xs)"}"))
+(define (**c-for s1 s2 s3 xs) (++ "for("s1";"s2";"s3"){"(**top xs)"}"))
 (define (**for-vector i v xs)
   (let ([s (gensym)] [o (gensym)])
     (++ (**define o v)
@@ -55,8 +55,8 @@
 (define (*not-eq? x y) (++ "("x"!=="y")"))
 (define (*js-eq? x y) (++ "("x"=="y")"))
 (define (*js-not-eq? x y) (++ "("x"!="y")"))
-(define (**js-for-in s o xs) (++ "for("s" in "o"){"(%**block xs)"}"))
-(define (**js-if b xb yb) (++ "if("b"){"(%**block xb)"}else{"(%**block yb)"}"))
+(define (**js-for-in s o xs) (++ "for("s" in "o"){"(**top xs)"}"))
+(define (**js-if b xb yb) (++ "if("b"){"(**top xb)"}else{"(**top yb)"}"))
 (define (**if b xb yb) (**js-if (*not-eq? b *false) xb yb))
 (define *false "false")
 (define *true "true")
@@ -68,3 +68,6 @@
 (define (object-ref o k) (++ o"["k"]"))
 (define (vector-ref v k) (++ v"["k"]"))
 (define (: o k xs) (++ o"."(**var k)"("(%**app xs)")"))
+(define (**number x) (number->string (exact->inexact x)))
+(define (**string x) (format "~s" x))
+
