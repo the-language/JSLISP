@@ -65,11 +65,11 @@
 (define (**set! v x) (++ (**var v)"="x))
 (define (*object-set! o k x) (++ o"["k"]="x))
 (define (*vector-set! v k x) (++ v"["k"]="x))
-(define (/ o k) (++ o"."(**var k)))
-(define (/= o k v) (++ o"."(**var k)"="v))
-(define (object-ref o k) (++ o"["k"]"))
-(define (vector-ref v k) (++ v"["k"]"))
-(define (: o k xs) (++ o"."(**var k)"("(%**app xs)")"))
+(define (**/ o k) (++ o"."(**var k)))
+(define (**/= o k v) (++ o"."(**var k)"="v))
+(define (*object-ref o k) (++ o"["k"]"))
+(define (*vector-ref v k) (++ v"["k"]"))
+(define (*: o k xs) (++ o"."(**var k)"("(%**app xs)")"))
 (define (**number x) (number->string (exact->inexact x)))
 (define (**string x) (format "~s" x))
 (define (**new x xs) (++ "new "x"("(%**app xs)")"))
@@ -83,9 +83,11 @@
                             (cons
                              (**define %**struct-t (**new k '()))
                              (append
-                              (map (λ (f) (/= %**struct-t-v f (**var f))) fs)
+                              (map (λ (f) (**/= %**struct-t-v f (**var f))) fs)
                               (list (**return %**struct-t-v))))))
         ";"
         (**define pred
                   (**lambda (list %**struct-t)
                             (list (**return (*is-a? %**struct-t-v k))))))))
+(define (**or xs) (++ "("(add-between xs "||")")"))
+(define (**and xs) (++ "("(add-between xs "&&")")"))
