@@ -64,6 +64,7 @@
 (define (*if b x y) (*js-if (*not-eq? b *false) x y))
 (define (**set! v x) (++ (**var v)"="x))
 (define (*object-set! o k x) (++ o"["k"]="x))
+(define (**vector xs) (++ "["(%**app xs)"]"))
 (define (*vector-set! v k x) (++ v"["k"]="x))
 (define (**/ o k) (++ o"."(**var k)))
 (define (**/= o k v) (++ o"."(**var k)"="v))
