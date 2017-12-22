@@ -42,8 +42,8 @@
 (define (**for-vector i v xs)
   (let ([s (gensym)] [o (gensym)])
     (++ (**define o v)
-    (**c-for (**define s 0) (*< (**var s) (*length (**var o))) (**++ (**var s))
-            (cons (**define i (**var s)) xs)))))
+        (**c-for (**define s 0) (*< (**var s) (*length (**var o))) (**++ (**var s))
+                 (cons (**define i (**var s)) xs)))))
 (define (**define s x) (++ "var "(**var s)"="x))
 (define (**define-undefined s) (++ "var "(**var s)))
 (define (*< x y) (++ "("x"<"y")"))
@@ -62,12 +62,30 @@
 (define *true "true")
 (define (*js-if b x y) (++ "("b"?"x":"y")"))
 (define (*if b x y) (*js-if (*not-eq? b *false) x y))
-(define (**set! v x) (**set-left! (**var v) x))
-(define (**set-left! v x) (++ v"="x))
+(define (**set! v x) (++ (**var v)"="x))
+(define (*object-set! o k x) (++ o"["k"]="x))
+(define (*vector-set! v k x) (++ v"["k"]="x))
 (define (/ o k) (++ o"."(**var k)))
+(define (/= o k v) (++ o"."(**var k)"="v))
 (define (object-ref o k) (++ o"["k"]"))
 (define (vector-ref v k) (++ v"["k"]"))
 (define (: o k xs) (++ o"."(**var k)"("(%**app xs)")"))
 (define (**number x) (number->string (exact->inexact x)))
 (define (**string x) (format "~s" x))
-
+(define (**new x xs) (++ "new "x"("(%**app xs)")"))
+(define %**struct-t (gensym))
+(define %**struct-t-v (**var %**struct-t))
+(define (**struct pred new fs)
+  (let ([k (**var (gensym))])
+    (++ "var "k"=function(){};"
+        (**define new
+                  (**lambda fs
+                            (cons
+                             (**define %**struct-t (**new k '()))
+                             (append
+                              (map (λ (f) (/= %**struct-t-v f (**var f))) fs)
+                              (list (**return %**struct-t-v))))))
+        ";"
+        (**define pred
+                  (**lambda (list %**struct-t)
+                            (list (**return (*is-a? %**struct-t-v k))))))))
