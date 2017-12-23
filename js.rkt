@@ -63,6 +63,7 @@
 (define */* (*%* "/"))
 (define ((%*xfx f) x y) (++ "("x f y")"))
 (define *eq? (%*xfx "==="))
+(define *= *eq?)
 (define *not-eq? (%*xfx "!=="))
 (define *js-eq? (%*xfx "=="))
 (define *js-not-eq? (%*xfx "!="))
@@ -139,6 +140,7 @@
    '<= *<=
    '>= *>=
    'eq? *eq?
+   '= *=
    'not-eq? *not-eq?
    'js-eq? *js-eq?
    'js-not-eq? *js-not-eq?
