@@ -88,6 +88,7 @@
 (define (**/ o k) (++ o"."(**var k)))
 (define (**/= o k v) (++ o"."(**var k)"="v))
 (define (*object-ref o k) (++ o"["k"]"))
+(define (**object* xs) (++ "{"(%add%between (map (λ (x) (++ (**var (first x))":"(second x))) xs) ",")"}"))
 (define (**: o k xs) (++ o"."(**var k)"("(%**app xs)")"))
 (define (**number x) (number->string (exact->inexact x)))
 (define (**string x) (format "~s" x))
