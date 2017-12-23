@@ -40,7 +40,6 @@
 (define (*boolean? x) (++ "(typeof "x"=='boolean')"))
 (define (*object/vector? x) (++ "(typeof "x"=='object')"))
 (define (*is-a? x t) (++ "("x" instanceof "t")"))
-(define (*vector? x) (*is-a? x "Array"))
 (define (**c-for s1 s2 s3 xs) (++ "for("s1";"s2";"s3"){"(**top xs)"}"))
 (define (**for-vector i v xs)
   (let ([s (gensym)] [o (gensym)])
@@ -71,6 +70,12 @@
 (define *<= (%*xfx "<="))
 (define *>= (%*xfx ">="))
 
+(define (*vector? x) (*is-a? x "Array"))
+(define (*vector* xs) (++ "["(%**app xs)"]"))
+(define (*vector-set! v k x) (++ v"["k"]="x))
+(define (*vector-ref v k) (++ v"["k"]"))
+(define (*append xs ys) (++ xs".concat("ys")"))
+
 (define (**js-for-in s o xs) (++ "for(var "(**var s)" in "o"){"(**top xs)"}"))
 (define (**js-if b xb yb) (++ "if("b"){"(**top xb)"}else{"(**top yb)"}"))
 (define (**if b xb yb) (**js-if (*not-eq? b *false) xb yb))
@@ -80,12 +85,9 @@
 (define (*if b x y) (*js-if (*not-eq? b *false) x y))
 (define (**set! v x) (++ (**var v)"="x))
 (define (*object-set! o k x) (++ o"["k"]="x))
-(define (**vector xs) (++ "["(%**app xs)"]"))
-(define (*vector-set! v k x) (++ v"["k"]="x))
 (define (**/ o k) (++ o"."(**var k)))
 (define (**/= o k v) (++ o"."(**var k)"="v))
 (define (*object-ref o k) (++ o"["k"]"))
-(define (*vector-ref v k) (++ v"["k"]"))
 (define (**: o k xs) (++ o"."(**var k)"("(%**app xs)")"))
 (define (**number x) (number->string (exact->inexact x)))
 (define (**string x) (format "~s" x))
@@ -115,7 +117,11 @@
    'boolean? *boolean?
    'number? *number?
    'object/vector? *object/vector?
+   'vector (λ xs (*vector* xs))
    'vector? *vector?
+   'vector-set! *vector-set!
+   'vector-ref *vector-ref
+   'append *append
    'undefined? *undefined?
    'is-a? *is-a?
    'length *length
@@ -136,12 +142,11 @@
    'if *if
    'js-if *js-if
    'object-set! *object-set!
-   'vector-set! *vector-set!
    'object-ref *object-ref
-   'vector-ref *vector-ref
    'new (λ (f . xs) (*new* f xs))
 
    'return **return
+   'begin (λ xs (%add%between xs ";"))
    ))
    
 (define (*exp x)
