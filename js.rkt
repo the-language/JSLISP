@@ -39,6 +39,7 @@
 (define (*number? x) (++ "(typeof "x"=='number')"))
 (define (*boolean? x) (++ "(typeof "x"=='boolean')"))
 (define (*object/vector? x) (++ "(typeof "x"=='object')"))
+(define (*char? x) (++ "(function(x){return typeof x=='string'&&x.length==1;})("x")"))
 (define (*is-a? x t) (++ "("x" instanceof "t")"))
 (define (**c-for s1 s2 s3 xs) (++ "for("s1";"s2";"s3"){"(**top xs)"}"))
 (define (**for-vector i v xs)
@@ -117,6 +118,7 @@
    'string? *string?
    'boolean? *boolean?
    'number? *number?
+   'char? *char?
    'object/vector? *object/vector?
    'vector (λ xs (*vector* xs))
    'vector? *vector?
