@@ -169,6 +169,7 @@
                [(eq? f '/=) (**/= (*exp (first xs)) (second xs) (*exp (third xs)))]
                [(eq? f ':) (**: (*exp (car xs)) (cadr xs) (map *exp (cddr xs)))]
                [(eq? f 'struct) (**struct (first xs) (second xs) (third xs))]
+               [(eq? f 'object) (**object* (map (λ (x) (list (first x) (*exp (second x)))) xs))]
                [else (**apply* (*exp f) (map *exp xs))]))))]
     [(symbol? x)
      (cond
