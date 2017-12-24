@@ -25,7 +25,20 @@
 (define ((*%* k) xs) (++ "("(ADDbetweenSTRING xs k)")"))
 (define ((%*xfx f) x y) (++ "("x f y")"))
 
-(define (**var x) (symbol->string x)) ; Bug
+(define **var**cs (string->list "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890_$"))
+(define (**var x)
+  (let* ([x (symbol->string x)] [xs (string->list x)])
+    (if (andmap (λ (x) (member x **var**cs)) xs)
+        x
+        (%**var xs (λ (xs) x) (λ (xs) (list->string (cons #\Z xs)))))))
+(define (%**var xs k1 k2)
+  (if (null? xs)
+      (k1 '())
+      (let ([x (car xs)] [xs (cdr xs)])
+        (if (and (member x **var**cs) (not (eq? x #\_)))
+            (%**var xs (λ (xs) (k1 (cons x xs))) (λ (xs) (k2 (cons x xs))))
+            (let ([xx (cons #\_ (string->list (number->string (char->integer x))))])
+              (%**var xs (λ (xs) (k2 (append xx xs))) (λ (xs) (k2 (append xx xs)))))))))
 (define (**top xs)
   (if (null? (cdr xs))
       (++ (car xs)";")
@@ -164,7 +177,7 @@
    'vector (λ xs (*vector* xs))
    'vector-set! *vector-set!
    'vector-ref *vector-ref
-   'vector-append *vector-append*
+   'vector-append (λ xs (*vector-append* xs))
    'vector-length *vector-length
    'vector-head *vector-head
    'vector-tail *vector-tail
