@@ -100,7 +100,8 @@
   (++ "var "%*r1"="v";"
       "for(var "%*r2"=0;"%*r2"<"%*r1".length;"%*r2"++){var "i"="%*r2";"(**top xs)"}"
       ))
-
+(define (*vector-head x) (++ x"[0]"))
+(define (*vector-tail x) (++ x".slice(1)"))
 
 (define *undefined "undefined")
 (define (*undefined? x) (++ "("x"===null)"))
@@ -165,6 +166,8 @@
    'vector-ref *vector-ref
    'vector-append *vector-append*
    'vector-length *vector-length
+   'vector-head *vector-head
+   'vector-tail *vector-tail
 
    'undefined *undefined
    'undefined? *undefined?
