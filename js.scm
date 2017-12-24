@@ -31,7 +31,7 @@
         x
         (%**var xs (λ (xs) x) (λ (xs) (list->string (cons #\Z xs)))))))
 (define (%**var xs k1 k2)
-  (define (pack_ x) (string->list (number->string (char->integer x))))
+  (define (pack_ x) (cons #\_ (append (string->list (number->string (char->integer x))) '(#\C))))
   (if (null? xs)
       (k1 '())
       (let ([x (car xs)] [xs (cdr xs)])
