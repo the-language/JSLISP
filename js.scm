@@ -83,6 +83,8 @@
 (define *string-append* (*%* "+"))
 (define (*string-ref s k) (++ s".charAt("k")"))
 (define (*string-length s) (++ s".length"))
+(define (*list->string xs) (++ xs".join('')"))
+(define (*string->list s) (++ "Array.prototype.slice.call("s")"))
 
 (define (*number? x) (++ "(typeof "x"=='number')"))
 (define (*number->string x) (++ "String("x")"))
@@ -166,6 +168,8 @@
    'string-append (λ xs (*string-append* xs))
    'string-ref *string-ref
    'string-length *string-length
+   'list->string *list->string
+   'string->list *string->list
 
    'number? *number?
    'number->string *number->string
