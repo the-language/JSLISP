@@ -16,7 +16,7 @@
 
 (define (%**lam-arg args)
   (cond
-    [(symbol? args) (++ (**var args)"...")]
+    [(symbol? args) (++ (**var args)"...")] ; 有兼容性问题
     [(null? args) ""]
     [(null? (cdr args)) (**var (car args))]
     [else (++ (**var (car args))","(%**lam-arg (cdr args)))]))
@@ -85,8 +85,8 @@
 (define (*string-length s) (++ s".length"))
 (define (*list->string xs) (++ xs".join('')"))
 (define (*string->list s) (++ "Array.prototype.slice.call("s")"))
-(define (*char->integer s) (++ s".codePointAt()"))
-(define (*integer->char x) (++ "String.fromCodePoint("x")"))
+(define (*char->integer s) (++ s".codePointAt(0)")) ; 有兼容性问题
+(define (*integer->char x) (++ "String.fromCodePoint("x")")) ; 有兼容性问题
 
 (define (*number? x) (++ "(typeof "x"=='number')"))
 (define (*number->string x) (++ "String("x")"))
