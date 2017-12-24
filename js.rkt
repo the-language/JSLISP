@@ -46,6 +46,7 @@
 (define (**define s x) (++ "var "(**var s)"="x))
 (define (**define-undefined s) (++ "var "(**var s)))
 (define (**set! v x) (++ (**var v)"="x))
+(define (**begin* xs) (ADDbetweenSTRING xs ";"))
 
 (define (**return x) (++ "return "x))
 (define (**lambda args body)
@@ -138,9 +139,9 @@
 
 (define %*exp*fs
   (hash
-   'apply *apply
+   'begin (λ xs (**begin* xs))
    'return **return
-   'begin (λ xs (ADDbetweenSTRING xs ";"))
+   'apply *apply
    'procedure? *procedure?
 
    'raise *raise
