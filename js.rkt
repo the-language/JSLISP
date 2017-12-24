@@ -134,8 +134,8 @@
                               (list (**return %*r1))))))
         ";"
         (**define pred
-                  (**lambda (list %*r1-s)
-                            (list (**return (++ "("%*r1" instanceof "k")"))))))))
+                  (**lambda '(x)
+                            (list (**return (++ "(x instanceof "k")"))))))))
 
 (define %*exp*fs
   (hash
