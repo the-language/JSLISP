@@ -122,6 +122,7 @@
       ))
 (define (*vector-head x) (++ x"[0]"))
 (define (*vector-tail x) (++ x".slice(1)"))
+(define (*vector-map f xs) (++ xs".map("f")"))
 
 (define *undefined "undefined")
 (define (*undefined? x) (++ "("x"===null)"))
@@ -190,6 +191,7 @@
    'vector-length *vector-length
    'vector-head *vector-head
    'vector-tail *vector-tail
+   'vector-map *vector-map
 
    'undefined *undefined
    'undefined? *undefined?
