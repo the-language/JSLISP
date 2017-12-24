@@ -41,6 +41,7 @@
       "})"))
 (define (%**app xs) (ADDbetweenSTRING xs ","))
 (define (**apply* f xs) (++ f"("(%**app xs)")"))
+(define (*apply f xs) (++ f".apply(null,"xs")"))
 (define (*procedure? x) (++ "(typeof "x"=='function')"))
 
 (define (*raise x) (++ "throw "x))
@@ -123,6 +124,7 @@
 
 (define %*exp*fs
   (hash
+   'apply *apply
    'return **return
    'begin (λ xs (ADDbetweenSTRING xs ";"))
    'procedure? *procedure?
