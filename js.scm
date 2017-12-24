@@ -85,6 +85,8 @@
 (define (*string-length s) (++ s".length"))
 (define (*list->string xs) (++ xs".join('')"))
 (define (*string->list s) (++ "Array.prototype.slice.call("s")"))
+(define (*char->integer s) (++ s".codePointAt()"))
+(define (*integer->char x) (++ "String.fromCodePoint("x")"))
 
 (define (*number? x) (++ "(typeof "x"=='number')"))
 (define (*number->string x) (++ "String("x")"))
@@ -170,6 +172,8 @@
    'string-length *string-length
    'list->string *list->string
    'string->list *string->list
+   'char->integer *char->integer
+   'integer->char *integer->char
 
    'number? *number?
    'number->string *number->string
