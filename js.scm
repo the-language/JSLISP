@@ -85,6 +85,8 @@
 (define (*string-length s) (++ s".length"))
 
 (define (*number? x) (++ "(typeof "x"=='number')"))
+(define (*number->string x) (++ "String("x")"))
+(define (*string->number x) (++ "Number("x")"))
 (define *+* (*%* "+"))
 (define *-* (*%* "-"))
 (define *** (*%* "*"))
@@ -165,6 +167,8 @@
    'string-length *string-length
 
    'number? *number?
+   'number->string *number->string
+   'string->number *string->number
    '+ (λ xs (*+* xs))
    '- (λ xs (*-* xs))
    '* (λ xs (*** xs))
