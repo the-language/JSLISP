@@ -128,6 +128,9 @@
 (define (*vector-tail x) (++ x".slice(1)"))
 (define (*vector-map f xs) (++ xs".map("f")"))
 
+(define (*new* f xs) (++ "new "f"("(%**app xs)")"))
+(define (*is-a? x f) (++ "("x" instanceof "f")"))
+
 (define *undefined "undefined")
 (define (*undefined? x) (++ "("x"===null)"))
 
@@ -200,6 +203,9 @@
    '^vector-head *vector-head
    '^vector-tail *vector-tail
    '^vector-map *vector-map
+
+   '^new (λ (f . xs) (*new* f xs))
+   '^is-a? *is-a?
 
    '^undefined *undefined
    '^undefined? *undefined?
