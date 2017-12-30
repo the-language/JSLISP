@@ -150,59 +150,59 @@
 
 (define %*exp*fs
   (hash
-   'begin (λ xs (**begin* xs))
-   'return **return
-   'apply *apply
-   'procedure? *procedure?
+   '^begin (λ xs (**begin* xs))
+   '^return **return
+   '^apply *apply
+   '^procedure? *procedure?
 
-   'raise *raise
+   '^raise *raise
 
-   'boolean? *boolean?
-   'eq? *eq?
-   'not-eq? *not-eq?
-   'or (λ xs (*or* xs))
-   'and (λ xs (*and* xs))
-   'not *not
-   'if-boolean *if-boolean
-   'if *if
+   '^boolean? *boolean?
+   '^eq? *eq?
+   '^not-eq? *not-eq?
+   '^or (λ xs (*or* xs))
+   '^and (λ xs (*and* xs))
+   '^not *not
+   '^if-boolean *if-boolean
+   '^if *if
 
-   'string? *string?
-   'string-append (λ xs (*string-append* xs))
-   'string-ref *string-ref
-   'string-length *string-length
-   'list->string *list->string
-   'string->list *string->list
-   'char->integer *char->integer
-   'integer->char *integer->char
+   '^string? *string?
+   '^string-append (λ xs (*string-append* xs))
+   '^string-ref *string-ref
+   '^string-length *string-length
+   '^list->string *list->string
+   '^string->list *string->list
+   '^char->integer *char->integer
+   '^integer->char *integer->char
 
-   'number? *number?
-   'number->string *number->string
-   'string->number *string->number
-   '+ (λ xs (*+* xs))
-   '- (λ xs (*-* xs))
-   '* (λ xs (*** xs))
-   '/ (λ xs (*/* xs))
-   '= *=
-   '< *<
-   '> *>
-   '<= *<=
-   '>= *>=
+   '^number? *number?
+   '^number->string *number->string
+   '^string->number *string->number
+   '^+ (λ xs (*+* xs))
+   '^- (λ xs (*-* xs))
+   '^* (λ xs (*** xs))
+   '^/ (λ xs (*/* xs))
+   '^= *=
+   '^< *<
+   '^> *>
+   '^<= *<=
+   '^>= *>=
 
-   'object-ref *object-ref
-   'object/vector? *object/vector?
-   'object-set! *object-set!
-   'vector? *vector?
-   'vector (λ xs (*vector* xs))
-   'vector-set! *vector-set!
-   'vector-ref *vector-ref
-   'vector-append (λ xs (*vector-append* xs))
-   'vector-length *vector-length
-   'vector-head *vector-head
-   'vector-tail *vector-tail
-   'vector-map *vector-map
+   '^object-ref *object-ref
+   '^object/vector? *object/vector?
+   '^object-set! *object-set!
+   '^vector? *vector?
+   '^vector (λ xs (*vector* xs))
+   '^vector-set! *vector-set!
+   '^vector-ref *vector-ref
+   '^vector-append (λ xs (*vector-append* xs))
+   '^vector-length *vector-length
+   '^vector-head *vector-head
+   '^vector-tail *vector-tail
+   '^vector-map *vector-map
 
-   'undefined *undefined
-   'undefined? *undefined?
+   '^undefined *undefined
+   '^undefined? *undefined?
    ))
    
 (define (*exp x)
@@ -213,26 +213,26 @@
          (if r
              (apply r (map *exp xs))
              (cond
-               [(or (eq? f 'λ) (eq? f 'lambda)) (**lambda (car xs) (map *exp (cdr xs)))]
-               [(eq? f 'define) (**define (first xs) (*exp (second xs)))]
-               [(eq? f 'define-undefined) (**define-undefined (first xs))]
-               [(eq? f 'set!) (**set! (first xs) (*exp (second xs)))]
-               [(eq? f 'try) (**try (map *exp (first xs)) (second xs) (map *exp (third xs)))]
+               [(eq? f '^lambda) (**lambda (car xs) (map *exp (cdr xs)))]
+               [(eq? f '^define) (**define (first xs) (*exp (second xs)))]
+               [(eq? f '^define-undefined) (**define-undefined (first xs))]
+               [(eq? f '^set!) (**set! (first xs) (*exp (second xs)))]
+               [(eq? f '^try) (**try (map *exp (first xs)) (second xs) (map *exp (third xs)))]
 
-               [(eq? f 'if-boolean/do) (**if-boolean (*exp (first xs)) (map *exp (second xs)) (map *exp (third xs)))]
-               [(eq? f 'if/do) (**if (*exp (first xs)) (map *exp (second xs)) (map *exp (third xs)))]
+               [(eq? f '^if-boolean/do) (**if-boolean (*exp (first xs)) (map *exp (second xs)) (map *exp (third xs)))]
+               [(eq? f '^if/do) (**if (*exp (first xs)) (map *exp (second xs)) (map *exp (third xs)))]
 
-               [(eq? f '@) (**@ (*exp (first xs)) (second xs))]
-               [(eq? f '@=) (**@= (*exp (first xs)) (second xs) (*exp (third xs)))]
-               [(eq? f 'object) (**object* (map (λ (x) (list (first x) (*exp (second x)))) xs))]
-               [(eq? f ':) (**: (*exp (car xs)) (cadr xs) (map *exp (cddr xs)))]
+               [(eq? f '^@) (**@ (*exp (first xs)) (second xs))]
+               [(eq? f '^@=) (**@= (*exp (first xs)) (second xs) (*exp (third xs)))]
+               [(eq? f '^object) (**object* (map (λ (x) (list (first x) (*exp (second x)))) xs))]
+               [(eq? f '^:) (**: (*exp (car xs)) (cadr xs) (map *exp (cddr xs)))]
 
-               [(eq? f 'for-object) (**for-object (car xs) (*exp (cadr xs)) (cddr xs))]
-               [(eq? f 'for-vector) (**for-vector (car xs) (*exp (cadr xs)) (cddr xs))]
+               [(eq? f '^for-object) (**for-object (car xs) (*exp (cadr xs)) (cddr xs))]
+               [(eq? f '^for-vector) (**for-vector (car xs) (*exp (cadr xs)) (cddr xs))]
 
-               [(eq? x 'undefined) *undefined]
+               [(eq? x '^undefined) *undefined]
 
-               [(eq? f 'struct) (**struct (first xs) (second xs) (third xs))]
+               [(eq? f '^struct) (**struct (first xs) (second xs) (third xs))]
                [else (**apply* (*exp f) (map *exp xs))]))))]
     [(symbol? x) (**var x)]
     [(number? x) (**number x)]
