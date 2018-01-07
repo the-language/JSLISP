@@ -25,7 +25,8 @@
 (define ((%*xfx f) x y) (++ "("x f y")"))
 
 (define **var**cs (string->list "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890_$"))
-(define (js-id-xs? xs) (andmap (λ (x) (member x **var**cs)) xs))
+(define **var**head (string->list "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM_$"))
+(define (js-id-xs? xs) (and (andmap (λ (x) (member x **var**cs)) xs) (member (car xs) **var**head)))
 (define (js-id? x) (js-id-xs? (string->list (symbol->string x))))
 (define (**var x)
   (let* ([x (symbol->string x)] [xs (string->list x)])
